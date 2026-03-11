@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test: System Feudalny</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --dark: #1a1008;
+    --parchment: #f5ead8;
+    --parchment-dark: #e8d5b0;
+    --crimson: #8b1a1a;
+    --crimson-light: #c0392b;
+    --forest: #2d5a27;
+    --ink: #2c1810;
+    --correct: #2d6e2d;
+    --wrong: #8b1a1a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'EB Garamond', serif;
+    background: var(--dark);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, #2a1a05 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, #1a0a00 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .wrapper {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 50px;
+    position: relative;
+  }
+  .header::before, .header::after {
+    content: '⚔';
+    font-size: 2rem;
+    color: var(--gold);
+    opacity: 0.6;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .header::before { left: 0; }
+  .header::after { right: 0; }
+
+  .crown {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 10px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(201,168,76,0.4), 2px 2px 0 #8b6914;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+  }
+  .subtitle {
+    font-size: 1.1rem;
+    color: var(--gold-light);
+    opacity: 0.7;
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    background: rgba(201,168,76,0.15);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 4px;
+    height: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    transition: width 0.5s ease;
+    border-radius: 4px;
+  }
+  .progress-text {
+    text-align: right;
+    color: var(--gold);
+    font-size: 0.85rem;
+    font-family: 'Cinzel', serif;
+    margin-bottom: 30px;
+  }
+
+  /* QUESTION CARD */
+  .question-card {
+    background: linear-gradient(160deg, var(--parchment) 0%, var(--parchment-dark) 100%);
+    border-radius: 4px;
+    padding: 36px 40px 30px;
+    margin-bottom: 28px;
+    border: 1px solid rgba(201,168,76,0.5);
+    box-shadow:
+      0 0 0 4px rgba(201,168,76,0.08),
+      0 8px 40px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(255,255,255,0.5);
+    position: relative;
+    animation: slideIn 0.4s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 8px; right: 8px; bottom: 8px;
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  .q-number {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--crimson);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .q-text {
+    font-size: 1.25rem;
+    color: var(--ink);
+    line-height: 1.6;
+    font-weight: 600;
+    margin-bottom: 28px;
+  }
+
+  /* OPTIONS */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option-btn {
+    background: rgba(255,255,255,0.6);
+    border: 2px solid rgba(201,168,76,0.35);
+    border-radius: 4px;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'EB Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    background: rgba(201,168,76,0.15);
+    border-color: var(--gold);
+    transform: translateX(4px);
+    box-shadow: -3px 0 0 var(--gold);
+  }
+
+  .option-letter {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.2);
+    border: 1px solid rgba(201,168,76,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--crimson);
+  }
+
+  .option-btn.correct {
+    background: rgba(45,110,45,0.15);
+    border-color: var(--correct);
+    box-shadow: -4px 0 0 var(--correct), 0 0 20px rgba(45,110,45,0.15);
+    animation: correctPulse 0.4s ease;
+  }
+  @keyframes correctPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  .option-btn.correct .option-letter { background: var(--correct); color: white; border-color: var(--correct); }
+
+  .option-btn.wrong {
+    background: rgba(139,26,26,0.1);
+    border-color: var(--wrong);
+    box-shadow: -4px 0 0 var(--wrong);
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  .option-btn.wrong .option-letter { background: var(--wrong); color: white; border-color: var(--wrong); }
+
+  .option-btn:disabled { cursor: default; }
+
+  /* FEEDBACK */
+  .feedback {
+    display: none;
+    margin-top: 22px;
+    padding: 18px 22px;
+    border-radius: 4px;
+    font-size: 1rem;
+    line-height: 1.7;
+    animation: fadeIn 0.35s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .feedback.show { display: block; }
+
+  .feedback.correct-fb {
+    background: rgba(45,110,45,0.12);
+    border: 1px solid rgba(45,110,45,0.4);
+    border-left: 4px solid var(--correct);
+  }
+  .feedback.wrong-fb {
+    background: rgba(139,26,26,0.08);
+    border: 1px solid rgba(139,26,26,0.3);
+    border-left: 4px solid var(--wrong);
+  }
+
+  .feedback-header {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .feedback.correct-fb .feedback-header { color: var(--correct); }
+  .feedback.wrong-fb .feedback-header { color: var(--wrong); }
+
+  .feedback-body { color: var(--ink); }
+  .feedback-body strong { color: var(--crimson); }
+
+  /* NEXT BUTTON */
+  .next-btn {
+    display: none;
+    margin-top: 22px;
+    background: linear-gradient(135deg, var(--crimson) 0%, #6b1010 100%);
+    color: var(--gold-light);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 4px;
+    padding: 13px 32px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    float: right;
+  }
+  .next-btn:hover {
+    background: linear-gradient(135deg, #a02020 0%, #8b1a1a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  }
+  .next-btn.show { display: block; }
+  .clearfix::after { content: ''; display: table; clear: both; }
+
+  /* SCORE SCREEN */
+  .score-screen {
+    display: none;
+    text-align: center;
+    background: linear-gradient(160deg, var(--parchment) 0%, var(--parchment-dark) 100%);
+    border-radius: 4px;
+    padding: 60px 40px;
+    border: 1px solid rgba(201,168,76,0.5);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    animation: slideIn 0.5s ease;
+  }
+  .score-screen.show { display: block; }
+
+  .score-icon { font-size: 4rem; margin-bottom: 20px; }
+  .score-title {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: var(--gold);
+    text-shadow: 2px 2px 0 #8b6914;
+    margin-bottom: 10px;
+  }
+  .score-num {
+    font-family: 'Cinzel', serif;
+    font-size: 4rem;
+    color: var(--crimson);
+    line-height: 1;
+    margin: 20px 0;
+  }
+  .score-msg {
+    font-size: 1.15rem;
+    color: var(--ink);
+    font-style: italic;
+    max-width: 500px;
+    margin: 0 auto 30px;
+    line-height: 1.7;
+  }
+  .restart-btn {
+    background: linear-gradient(135deg, var(--crimson) 0%, #6b1010 100%);
+    color: var(--gold-light);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 4px;
+    padding: 15px 40px;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  .restart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  }
+
+  .divider {
+    text-align: center;
+    color: var(--gold);
+    font-size: 1.2rem;
+    opacity: 0.4;
+    margin: 6px 0 30px;
+    letter-spacing: 0.5em;
+  }
+
+  @media (max-width: 600px) {
+    .question-card { padding: 24px 20px 20px; }
+    .header::before, .header::after { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <span class="crown">👑</span>
+    <h1>System Feudalny</h1>
+    <div class="subtitle">Test wiedzy — Społeczeństwo średniowiecza</div>
+  </div>
+  <div class="divider">✦ ✦ ✦</div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar" style="width:0%"></div>
+  </div>
+  <div class="progress-text" id="progressText">Pytanie 1 z 12</div>
+
+  <div id="quizArea"></div>
+
+  <div class="score-screen" id="scoreScreen">
+    <div class="score-icon" id="scoreIcon">🏰</div>
+    <div class="score-title">Koniec testu!</div>
+    <div class="score-num" id="scoreNum">0/12</div>
+    <div class="score-msg" id="scoreMsg"></div>
+    <button class="restart-btn" onclick="restart()">⚔ Zagraj ponownie</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  // ── BLOK 1: PODSTAWY SYSTEMU FEUDALNEGO ──
+  {
+    q: "Jaką zasadę dotyczącą państwa obowiązywała początkowo w średniowieczu?",
+    opts: [
+      "Państwo należało do wszystkich obywateli",
+      "Państwo jest prywatną własnością władcy",
+      "Państwo zarządzane było przez kościół",
+      "Państwo dzieliło się równo między seniorów"
+    ],
+    answer: 1,
+    explanation: "W średniowieczu obowiązywała początkowo zasada, że <strong>państwo jest prywatną własnością władcy</strong> i dlatego w jego posiadaniu pozostawała cała ziemia. Z czasem król lub książę zaczął przekazywać część swoich posiadłości rycerzom, dworzanom czy duchownym, zapewniając sobie w ten sposób ich poparcie i wierność."
+  },
+  {
+    q: "Jak nazywano króla lub księcia, który nadawał dobra ziemskie rycerzom lub duchownym?",
+    opts: ["Wasal", "Senior", "Suzeren", "Chłop"],
+    answer: [1, 2],
+    explanation: "<strong>Senior</strong> i <strong>Suzeren</strong> — obie odpowiedzi są poprawne! Senior to ogólna nazwa władcy nadającego ziemię wasalom. Suzeren to szczególne określenie najwyższego seniora — króla lub księcia stojącego na szczycie drabiny feudalnej, który sam nie był niczyim wasalem. Wasal to odbiorca lenna."
+  },
+  {
+    q: "Kim był WASAL w systemie feudalnym?",
+    opts: [
+      "Władcą nadającym ziemię",
+      "Osobą obdarowaną ziemią przez seniora, zobowiązaną do służby zbrojnej i rady",
+      "Chłopem pracującym w polu",
+      "Kupcem mieszkającym w mieście"
+    ],
+    answer: 1,
+    explanation: "<strong>Wasal</strong> to osoba, która otrzymała ziemię (lenno) od seniora. Wasal był zobowiązany służyć panu zbrojnie wraz z podległymi mu wojownikami oraz wspierać go radą. Musiał na swój koszt kupić konia, broń i zbroję."
+  },
+  {
+    q: "Czym było LENNO w systemie feudalnym?",
+    opts: [
+      "Podatek płacony przez chłopów",
+      "Ziemia nadawana przez seniora wasalowi w zamian za wierną służbę i pomoc zbrojną",
+      "Ceremonia złożenia przysięgi wierności",
+      "Przywilej nadawany mieszczanom"
+    ],
+    answer: 1,
+    explanation: "<strong>Lenno</strong> (łac. <em>feudum</em>) to ziemia, którą wasal otrzymywał od seniora w użytkowanie. Była to zapłata za wierność i gotowość do służby zbrojnej. Stąd pochodzi słowo <em>feudalizm</em>. Najczęściej lenno dziedziczyli po wasalu jego potomkowie."
+  },
+  {
+    q: "Skąd pochodzi łacińska nazwa 'feudum', od której wzięło się słowo feudalizm?",
+    opts: [
+      "Od nazwy miasta Feud w Niemczech",
+      "Od słowa oznaczającego ziemię nadawaną wasalowi przez seniora",
+      "Od imienia pierwszego króla feudalnego",
+      "Od łacińskiego słowa oznaczającego wojnę"
+    ],
+    answer: 1,
+    explanation: "Słowo <strong>feudalizm</strong> pochodzi od łacińskiego <em>feudum</em>, oznaczającego ziemię nadawaną przez seniora wasalowi w zamian za wierną służbę i pomoc zbrojną. Dlatego średniowieczne społeczeństwo, w którym występował podział na seniorów i wasali, nazywamy <strong>społeczeństwem feudalnym</strong>."
+  },
+  {
+    q: "Co senior zapewniał wasalowi poza nadaniem ziemi?",
+    opts: [
+      "Wyłącznie ziemię, nic więcej",
+      "Ochronę i opiekę",
+      "Zwolnienie z wszelkich obowiązków",
+      "Prawo do pobierania podatków od całego królestwa"
+    ],
+    answer: 1,
+    explanation: "Senior nie tylko nadawał wasalowi ziemię, ale też otaczał go <strong>ochroną i opieką</strong>. To właśnie ta wzajemność — ziemia i ochrona w zamian za wierność i służbę zbrojną — stanowiła fundament systemu feudalnego."
+  },
+  {
+    q: "Czym groziło sprzeciwianie się seniorowi przez wasala?",
+    opts: ["Utratą tytułu rycerskiego", "Uznaniem za zdrajcę", "Zapłatą wysokiej grzywny", "Wygnaniem z kraju"],
+    answer: 1,
+    explanation: "Sprzeciwianie się seniorowi uznawano za <strong>zdradę</strong>. Wasal był zobowiązany służyć panu zbrojnie, wspierać go radą i kupić na swój koszt konia, broń i zbroję. Złamanie przysięgi wierności było najpoważniejszym wykroczeniem w systemie feudalnym."
+  },
+  {
+    q: "Co zazwyczaj działo się z lennem po śmierci wasala?",
+    opts: [
+      "Wracało automatycznie do seniora",
+      "Przechodziło na własność kościoła",
+      "Dziedziczyli je potomkowie wasala",
+      "Bylo dzielone między wszystkich rycerzy"
+    ],
+    answer: 2,
+    explanation: "Najczęściej lenno dziedziczyli po wasalu <strong>jego potomkowie</strong>. Ziemia pozostawała więc w rodzinie, o ile nowy dziedzic złożył hołd lenny nowemu seniorowi i zaprzysiągł mu wierność."
+  },
+
+  // ── BLOK 2: HOŁD LENNY ──
+  {
+    q: "Jak nazywała się uroczysta ceremonia, podczas której wasal przysięgał wierność seniorowi?",
+    opts: ["Koronacja", "Hołd lenny", "Msza wotywna", "Przywilej nadania"],
+    answer: 1,
+    explanation: "<strong>Hołd lenny</strong> to uroczysta ceremonia nadania lenna. Wasal klękał przed seniorem, chwytał go za dłonie i składał uroczystą przysięgę wierności. Na koniec senior wręczał wasalowi symbol nadania lenna."
+  },
+  {
+    q: "Co wasal robił podczas ceremonii hołdu lennego?",
+    opts: [
+      "Stał wyprostowany i podawał seniorowi miecz",
+      "Klękał przed seniorem, chwytał go za dłonie i składał przysięgę wierności",
+      "Zasiadał na tronie obok władcy",
+      "Publicznie ogłaszał swoje posiadłości"
+    ],
+    answer: 1,
+    explanation: "Podczas hołdu lennego wasal <strong>klękał przed seniorem, chwytał go za dłonie</strong> i składał uroczystą przysięgę wierności. Ten gest złożenia dłoni w dłonie seniora był kluczowym elementem ceremonii."
+  },
+  {
+    q: "Co senior wręczał wasalowi na zakończenie uroczystości hołdu lennego?",
+    opts: [
+      "Woreczek złota",
+      "Włócznię, chorągiew lub dokument potwierdzający nadanie lenna",
+      "Koronę i berło",
+      "Klucze do zamku"
+    ],
+    answer: 1,
+    explanation: "Na koniec uroczystości hołdu lennego senior wręczał wasalowi <strong>symbol nadania lenna</strong> — włócznię, chorągiew lub dokument potwierdzający zawartą między nimi umowę. Był to materialny znak zawarcia wiązania feudalnego."
+  },
+
+  // ── BLOK 3: DRABINA FEUDALNA ──
+  {
+    q: "Kto stał na szczycie drabiny feudalnej?",
+    opts: ["Biskup", "Hrabia", "Władca — król lub książę (suzeren)", "Rycerz"],
+    answer: 2,
+    explanation: "<strong>Władca</strong>, czyli suzeren (król lub książę), stał na szczycie drabiny feudalnej jako jedyny, który nie był niczyim wasalem. Poniżej niego znajdowali się możnowładcy świeccy i duchowni, a jeszcze niżej rycerze. Na samym dole hierarchii stali chłopi."
+  },
+  {
+    q: "Kim byli możnowładcy świeccy w drabinie feudalnej?",
+    opts: [
+      "Biskupi i opaci",
+      "Hrabiowie i baronowie",
+      "Rycerze i giermkowie",
+      "Chłopi i rzemieślnicy"
+    ],
+    answer: 1,
+    explanation: "<strong>Możnowładcy świeccy</strong> to hrabiowie i baronowie. Składali hołd lenny bezpośrednio władcy i sami mieli swoich wasali. Byli najbogatszymi i najbardziej wpływowymi świeckimi poddanymi króla."
+  },
+  {
+    q: "Kim byli możnowładcy duchowni w drabinie feudalnej?",
+    opts: [
+      "Hrabiowie i baronowie",
+      "Rycerze i giermkowie",
+      "Biskupi i opaci",
+      "Chłopi i rzemieślnicy"
+    ],
+    answer: 2,
+    explanation: "<strong>Możnowładcy duchowni</strong> to biskupi i opaci. Stali na tym samym szczeblu drabiny feudalnej co możnowładcy świeccy. Składali hołd lenny władcy, a sami mieli swoich wasali."
+  },
+  {
+    q: "Gdzie w drabinie feudalnej stali rycerze?",
+    opts: [
+      "Na samym szczycie, tuż obok władcy",
+      "Niżej niż możnowładcy, choć niektórzy byli bezpośrednimi wasalami władcy",
+      "Na tym samym poziomie co chłopi",
+      "Poza drabiną feudalną — nie brali w niej udziału"
+    ],
+    answer: 1,
+    explanation: "<strong>Rycerze</strong> stali w drabinie feudalnej niżej niż możnowładcy. Niektórzy z nich byli jednak bezpośrednimi wasalami władcy — zależało to od ich pozycji i majątku. Rycerstwo zajmowało się przede wszystkim służbą wojskową."
+  },
+  {
+    q: "Czy jedna osoba mogła być jednocześnie wasalem i seniorem?",
+    opts: [
+      "Nie, było to niemożliwe i zakazane",
+      "Tak — np. hrabia był wasalem króla, ale seniorem swoich rycerzy",
+      "Tylko duchowni mogli pełnić obie role",
+      "Tylko chłopi mogli być wasalami i seniorami"
+    ],
+    answer: 1,
+    explanation: "<strong>Tak!</strong> W systemie feudalnym jedna osoba mogła być jednocześnie wasalem i seniorem. Na przykład hrabia składał hołd lenny królowi (był jego wasalem), ale sam miał rycerzy, którym nadawał ziemię (był ich seniorem). Jedynie władca-suzeren był wyłącznie seniorem i niczyim wasalem."
+  },
+  {
+    q: "Jak chłopi funkcjonowali w systemie feudalnym — czy składali hołd lenny?",
+    opts: [
+      "Tak, składali hołd lenny bezpośrednio królowi",
+      "Tak, ale tylko raz w życiu",
+      "Nie — podlegali właścicielowi ziemi, lecz nie składali hołdu lennego",
+      "Nie brali żadnego udziału w systemie feudalnym"
+    ],
+    answer: 2,
+    explanation: "<strong>Chłopi nie składali hołdu lennego</strong>. Podlegali właścicielowi ziemi, którą uprawiali, ale ich relacja z panem opierała się na użytkowaniu ziemi i płaceniu danin — nie na ceremonii lennej. Hołd lenny był ceremonią właściwą dla warstwy rycerskiej i szlacheckiej."
+  },
+
+  // ── BLOK 4: STANY SPOŁECZNE ──
+  {
+    q: "Co to były PRZYWILEJE w średniowieczu?",
+    opts: [
+      "Podatki pobierane przez władcę",
+      "Szczególne uprawnienia przyznawane określonym osobom lub grupom ludzi",
+      "Ziemie nadawane chłopom",
+      "Ceremonie religijne odprawiane przez kościół"
+    ],
+    answer: 1,
+    explanation: "<strong>Przywileje</strong> to szczególne uprawnienia przysługujące określonym osobom lub grupom ludzi. Nadawali je władcy — zarówno pojedynczym osobom, jak i całym zbiorowościom. To właśnie nadawanie przywilejów doprowadziło do podziału społeczeństwa na stany."
+  },
+  {
+    q: "Co to były STANY w średniowiecznym społeczeństwie?",
+    opts: [
+      "Tereny zarządzane przez baronów",
+      "Grupy ludności różniące się od siebie prawami i obowiązkami",
+      "Podatki płacone władcom",
+      "Ceremonie dworskie"
+    ],
+    answer: 1,
+    explanation: "<strong>Stany</strong> to grupy ludności różniące się od siebie prawami i obowiązkami. Podział wynikał z przywilejów nadawanych przez władców. Wyróżniano cztery stany: duchowieństwo, rycerstwo (szlachtę), mieszczaństwo oraz chłopstwo."
+  },
+  {
+    q: "Ile stanów wyróżniamy w średniowiecznym społeczeństwie i jakie to stany?",
+    opts: [
+      "Dwa: szlachta i chłopi",
+      "Trzy: duchowni, rycerze i chłopi",
+      "Cztery: duchowieństwo, rycerstwo, mieszczaństwo i chłopstwo",
+      "Pięć: król, duchowni, szlachta, mieszczanie i chłopi"
+    ],
+    answer: 2,
+    explanation: "W średniowieczu wyróżniamy <strong>cztery stany</strong>: <br>1. <em>Duchowieństwo</em> — najbardziej uprzywilejowane<br>2. <em>Rycerstwo</em> (przekształcone w szlachtę)<br>3. <em>Mieszczaństwo</em><br>4. <em>Chłopstwo</em> — najliczniejsze, na dole hierarchii"
+  },
+  {
+    q: "Który stan społeczny był PIERWSZYM i szczególnie uprzywilejowanym?",
+    opts: ["Rycerstwo", "Mieszczaństwo", "Duchowieństwo", "Chłopstwo"],
+    answer: 2,
+    explanation: "<strong>Duchowieństwo</strong> było pierwszym i szczególnie uprzywilejowanym stanem. Było zwolnione z większości podatków i podlegało własnym sądom kościelnym, a nie królewskim. Duchowni pełnili też ważne funkcje na dworach władców, m.in. byli ich doradcami."
+  },
+  {
+    q: "Jakim sądom podlegało duchowieństwo w średniowieczu?",
+    opts: [
+      "Sądom królewskim, tak jak wszyscy",
+      "Własnym sądom kościelnym, a nie królewskim",
+      "Sądom rycerskim",
+      "Duchowni nie podlegali żadnym sądom"
+    ],
+    answer: 1,
+    explanation: "Duchowni podlegali <strong>własnym sądom kościelnym</strong>, a nie królewskim. Było to jedno z ich przywilejów. Warto wiedzieć, że sądy kościelne sądziły nie tylko ludzi, ale zdarzało się, że klątwy dotyczyły nawet zwierząt — pewien arcybiskup rzucił klątwę na jaskółki przeszkadzające mu w liturgii!"
+  },
+  {
+    q: "W co z czasem przekształciło się rycerstwo?",
+    opts: ["W duchowieństwo", "W szlachtę", "W mieszczaństwo", "W chłopstwo"],
+    answer: 1,
+    explanation: "<strong>Rycerstwo</strong> tworzyło drugi stan społeczny. Z czasem przekształciło się w <strong>szlachtę</strong>. Uzyskało liczne przywileje, m.in. prawo posiadania ziemi i pełnienia ważnych funkcji państwowych."
+  },
+  {
+    q: "Jakie było główne zadanie rycerstwa w średniowieczu?",
+    opts: [
+      "Handel i rzemiosło",
+      "Modlitwa i posługa religijna",
+      "Ochrona państwa i jego mieszkańców przed wrogami",
+      "Uprawa ziemi i zbieranie plonów"
+    ],
+    answer: 2,
+    explanation: "<strong>Rycerstwo</strong> miało obowiązek <strong>chronić państwo i jego mieszkańców</strong> przed niebezpieczeństwami, na przykład przed wrogimi najazdami. Rycerze byli warstwą wojskową — stąd ich obowiązek utrzymywania konia, broni i zbroi."
+  },
+  {
+    q: "Jakie prawo uzyskało mieszczaństwo w średniowieczu?",
+    opts: [
+      "Prawo do posiadania ziemi",
+      "Zwolnienie z podatków",
+      "Prawo do samorządu — samodzielnego zarządzania miastem",
+      "Prawo do składania hołdu lennego"
+    ],
+    answer: 2,
+    explanation: "<strong>Mieszczaństwo</strong> uzyskało prawo do <strong>samorządu</strong>, czyli samodzielnego zarządzania miastem. Musiało jednak płacić daniny właścicielowi miasta. Mieszczanie zajmowali się głównie handlem i rzemiosłem."
+  },
+  {
+    q: "Czym zajmowali się głównie mieszczanie w średniowieczu?",
+    opts: [
+      "Walką i obroną granic",
+      "Modlitwą i odprawianiem nabożeństw",
+      "Handlem i rzemiosłem",
+      "Uprawą ziemi należącej do panów"
+    ],
+    answer: 2,
+    explanation: "<strong>Mieszczanie</strong> zajmowali się głównie <strong>handlem i rzemiosłem</strong>. Mieszkali w miastach i korzystali z prawa do samorządu, choć musieli płacić daniny właścicielowi miasta."
+  },
+  {
+    q: "W jakim położeniu byli chłopi w średniowiecznym systemie stanowym?",
+    opts: [
+      "Byli najważniejszym stanem, bo uprawiali ziemię",
+      "Tworzyli najliczniejszy stan, użytkowali ziemię panów i płacili daniny",
+      "Mieli takie same prawa jak rycerze",
+      "Podlegali bezpośrednio sądom kościelnym"
+    ],
+    answer: 1,
+    explanation: "<strong>Chłopi</strong> tworzyli najliczniejszy stan, lecz znajdowali się na samym dole hierarchii. Użytkowali ziemię panów, płacili daniny i musieli pracować określoną liczbę dni w roku w majątku pana. Często nie mogli opuszczać zamieszkiwanej ziemi."
+  },
+  {
+    q: "Jakie obowiązki mieli chłopi wobec właściciela ziemi?",
+    opts: [
+      "Wyłącznie płacenie podatków państwowych",
+      "Składanie danin i odrabianie pańszczyzny — pracy przez określone dni w roku",
+      "Służba wojskowa i ochrona zamku",
+      "Brak obowiązków — ziemia była ich własnością"
+    ],
+    answer: 1,
+    explanation: "Chłopi musieli płacić właścicielowi ziemi <strong>daniny</strong> (część plonów lub pieniądze) i pracować w jego majątku przez <strong>określoną liczbę dni w roku</strong> (tzw. pańszczyzna). W zamian mogli użytkować ziemię pana."
+  },
+  {
+    q: "Czy chłopi mogli swobodnie opuszczać ziemię, którą uprawiali?",
+    opts: [
+      "Tak, mogli swobodnie się przemieszczać",
+      "Nie — często nie mogli opuszczać zamieszkiwanej i uprawianej ziemi",
+      "Tak, ale musieli uiścić opłatę",
+      "Mogli opuszczać ziemię tylko za zgodą kościoła"
+    ],
+    answer: 1,
+    explanation: "Chłopi <strong>często nie mogli opuszczać</strong> zamieszkiwanej i uprawianej przez siebie ziemi. Byli przywiązani do ziemi pana — stąd mówi się o <em>poddaństwie chłopskim</em>. Podlegali właścicielowi ziemi i nie mieli swobody przemieszczania."
+  },
+
+  // ── BLOK 5: WSPÓŁCZESNOŚĆ ──
+  {
+    q: "Kiedy w Europie rozpoczął się proces zrównywania ludzi w prawach, likwidujący podział na stany?",
+    opts: [
+      "W XII wieku",
+      "W XV wieku — w czasie renesansu",
+      "Pod koniec XVIII wieku",
+      "Dopiero w XXI wieku"
+    ],
+    answer: 2,
+    explanation: "Podział społeczeństwa europejskiego na stany utrzymywał się przez kilka stuleci. <strong>Pod koniec XVIII wieku</strong> rozpoczął się proces zrównywania ludzi w prawach. W niektórych państwach zakończył się on dopiero w XX wieku."
+  },
+  {
+    q: "Co charakteryzuje WSPÓŁCZESNE społeczeństwo w porównaniu do feudalnego?",
+    opts: [
+      "Wszyscy mają te same prawa i obowiązki, a podział stanowy nie obowiązuje",
+      "Nadal obowiązuje podział na cztery stany",
+      "Chłopi nadal muszą pracować dla właścicieli ziemi bez wynagrodzenia",
+      "Kościół nadal zarządza sądami państwowymi"
+    ],
+    answer: 0,
+    explanation: "We <strong>współczesnej Polsce</strong> podział stanowy nie funkcjonuje. Wszyscy mają te same prawa — mogą uczestniczyć w wyborach i zdobywać wykształcenie. Wszyscy też muszą przestrzegać tych samych przepisów prawa i płacić podatki."
+  },
+  {
+    q: "Jak zmieniła się pozycja rolników od średniowiecza do dziś?",
+    opts: [
+      "Nie zmieniła się — rolnicy nadal są własnością właścicieli ziemi",
+      "Dawni chłopi-poddani dziś najczęściej są właścicielami gruntów, na których pracują",
+      "Rolnicy dziś nie muszą płacić żadnych podatków",
+      "Rolnicy zniknęli — nikt już nie uprawia ziemi"
+    ],
+    answer: 1,
+    explanation: "W średniowieczu chłopi uprawiali ziemię panów i nie mogli jej opuścić. We współczesnej Polsce <strong>rolnicy są najczęściej właścicielami gruntów</strong>, na których pracują. Podobnie jak dawniej, część społeczeństwa nadal zajmuje się uprawą ziemi, lecz na zupełnie innych zasadach — jako wolni obywatele."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function render() {
+  const q = questions[current];
+  const pct = (current / questions.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `Pytanie ${current + 1} z ${questions.length}`;
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const optsHTML = q.opts.map((opt, i) => `
+    <button class="option-btn" id="opt${i}" onclick="choose(${i})">
+      <span class="option-letter">${letters[i]}</span>
+      <span>${opt}</span>
+    </button>
+  `).join('');
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="question-card">
+      <div class="q-number">Pytanie ${current + 1} z ${questions.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">${optsHTML}</div>
+      <div class="feedback" id="feedback"></div>
+      <div class="clearfix">
+        <button class="next-btn" id="nextBtn" onclick="next()">
+          ${current < questions.length - 1 ? 'Następne pytanie →' : 'Zobacz wynik 🏆'}
+        </button>
+      </div>
+    </div>
+  `;
+  answered = false;
+}
+
+function choose(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const fb = document.getElementById('feedback');
+  const allBtns = document.querySelectorAll('.option-btn');
+  const correctAnswers = Array.isArray(q.answer) ? q.answer : [q.answer];
+
+  allBtns.forEach(b => b.disabled = true);
+
+  const isCorrect = correctAnswers.includes(i);
+
+  if (isCorrect) {
+    score++;
+    document.getElementById(`opt${i}`).classList.add('correct');
+    fb.className = 'feedback correct-fb show';
+    fb.innerHTML = `<div class="feedback-header">✓ Poprawna odpowiedź!</div><div class="feedback-body">${q.explanation}</div>`;
+  } else {
+    document.getElementById(`opt${i}`).classList.add('wrong');
+    correctAnswers.forEach(a => document.getElementById(`opt${a}`).classList.add('correct'));
+    fb.className = 'feedback wrong-fb show';
+    fb.innerHTML = `<div class="feedback-header">✗ Błędna odpowiedź</div><div class="feedback-body">${q.explanation}</div>`;
+  }
+
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function next() {
+  current++;
+  if (current >= questions.length) {
+    showScore();
+  } else {
+    render();
+  }
+}
+
+function showScore() {
+  document.getElementById('quizArea').innerHTML = '';
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('progressText').textContent = `Ukończono!`;
+
+  const pct = score / questions.length;
+  let icon, msg;
+  if (pct === 1) {
+    icon = '👑'; msg = 'Doskonały wynik! Jesteś prawdziwym znawcą systemu feudalnego. Godny samego króla!';
+  } else if (pct >= 0.75) {
+    icon = '🏰'; msg = 'Bardzo dobry wynik! Twoja wiedza o średniowieczu jest imponująca. Rycerzu, dobrze służysz wiedzy!';
+  } else if (pct >= 0.5) {
+    icon = '⚔'; msg = 'Nieźle! Znasz podstawy systemu feudalnego, ale warto powtórzyć materiał, by stać się prawdziwym mistrzem.';
+  } else {
+    icon = '📜'; msg = 'Nie poddawaj się! Przeczytaj jeszcze raz materiał o systemie feudalnym i spróbuj ponownie. Każdy rycerz zaczynał jako giermek!';
+  }
+
+  document.getElementById('scoreIcon').textContent = icon;
+  document.getElementById('scoreNum').textContent = `${score} / ${questions.length}`;
+  document.getElementById('scoreMsg').textContent = msg;
+  document.getElementById('scoreScreen').classList.add('show');
+}
+
+function restart() {
+  current = 0;
+  score = 0;
+  answered = false;
+  document.getElementById('scoreScreen').classList.remove('show');
+  document.getElementById('progressBar').style.width = '0%';
+  // Shuffle questions
+  questions.sort(() => Math.random() - 0.5);
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
