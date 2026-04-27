@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Test historyczny — VI klasa (Bolesławowie, kryzys i odbudowa)</title>
+<style>
+  :root{--bg:#f7f9fc;--card:#fff;--accent:#0b63c6;--correct:#1f8a4c;--wrong:#c62828;--muted:#6b7280}
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:#111;margin:0;padding:24px}
+  .wrap{max-width:980px;margin:0 auto}
+  header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+  header h1{font-size:20px;margin:0}
+  header p{margin:0;color:var(--muted);font-size:14px}
+  .card{background:var(--card);border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(15,23,42,0.06);margin-bottom:16px}
+  .qcount{font-size:13px;color:var(--muted);margin-bottom:8px}
+  .question{font-size:18px;margin:8px 0 14px}
+  .options{display:grid;gap:8px}
+  .opt{background:#f1f5f9;border:1px solid #e6eef8;padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:10px}
+  .opt:hover{background:#e8f0fb}
+  .opt.disabled{cursor:default;opacity:0.85}
+  .opt.correct{background:rgba(31,138,76,0.12);border-color:rgba(31,138,76,0.25)}
+  .opt.wrong{background:rgba(198,40,40,0.08);border-color:rgba(198,40,40,0.18)}
+  .feedback{margin-top:12px;padding:10px;border-radius:8px;font-weight:600}
+  .feedback.correct{color:var(--correct);background:rgba(31,138,76,0.06);border:1px solid rgba(31,138,76,0.12)}
+  .feedback.wrong{color:var(--wrong);background:rgba(198,40,40,0.04);border:1px solid rgba(198,40,40,0.08)}
+  .controls{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:12px}
+  button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600}
+  button.secondary{background:#eef3fb;color:var(--accent);border:1px solid #d7e7fb}
+  .progress{height:10px;background:#e6eef8;border-radius:999px;overflow:hidden}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#2aa0ff);width:0%}
+  footer{font-size:13px;color:var(--muted);text-align:center;margin-top:18px}
+  .explain{margin-top:10px;color:#24303a;background:#fbfdff;padding:10px;border-radius:8px;border:1px solid #eef6ff;font-size:14px}
+  @media (max-width:560px){.question{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Test historyczny — VI klasa</h1>
+      <p>Tematy: kryzys i odbudowa państwa, Bolesław Śmiały, Kazimierz Odnowiciel, Bolesław Krzywousty, Pomorze, testament</p>
+    </div>
+  </header>
+
+  <div class="card" id="quizCard">
+    <div class="qcount" id="qcount">Pytanie 1 z 60</div>
+    <div class="question" id="question">Ładowanie pytania...</div>
+
+    <div class="options" id="options"></div>
+
+    <div id="feedbackArea"></div>
+
+    <div class="controls">
+      <div style="flex:1">
+        <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="secondary" id="prevBtn" onclick="prevQ()" disabled>Poprzednie</button>
+        <button id="nextBtn" onclick="nextQ()">Następne</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <strong>Instrukcja</strong>
+    <p style="margin:8px 0 0;color:var(--muted)">Odpowiedz na pytanie wybierając jedną z czterech odpowiedzi. Po kliknięciu zobaczysz od razu, czy odpowiedź jest poprawna. Możesz przejść do następnego pytania przyciskiem "Następne".</p>
+  </div>
+
+  <footer>Powodzenia — pracuj w swoim tempie.</footer>
+</div>
+
+<script>
+/* Dane pytań: 60 pytań dla ucznia klasy 6 — oparte na materiałach z podręcznika (tematy: XI–XII w., kryzys, odbudowa, Bolesławowie, Pomorze, testament) */
+const questions = [
+  {q:"W którym wieku miał miejsce kryzys państwa polskiego opisany w materiałach?", 
+   opts:["IX wiek","XI wiek","XIII wiek","XV wiek"], a:1,
+   exp:"Kryzys pierwszych Piastów i jego odbudowa miały miejsce w pierwszej połowie XI wieku."},
+
+  {q:"Kto był królem lub księciem Polski, którego konflikt z biskupem Stanisławem doprowadził do jego upadku?", 
+   opts:["Mieszko I","Bolesław Śmiały","Kazimierz Odnowiciel","Bolesław Krzywousty"], a:1,
+   exp:"Bolesław II Śmiały stracił władzę po konflikcie z biskupem Stanisławem."},
+
+  {q:"Jak nazywa się książę, który przywrócił porządek i odbudował państwo po kryzysie XI wieku?", 
+   opts:["Mieszko II","Kazimierz Odnowiciel","Władysław Herman","Bolesław Chrobry"], a:1,
+   exp:"Kazimierz Odnowiciel odbudował państwo i przeniósł siedzibę władzy do Krakowa."},
+
+  {q:"Co to były insygnia królewskie wymienione w tekście?", 
+   opts:["korona, berło, jabłko","miecz, tarcza, hełm","korona, berło, jabłko królewskie","sztandar, korona, miecz"], a:2,
+   exp:"Insygnia królewskie to korona, berło i jabłko królewskie (orb)."}, 
+
+  {q:"W którym roku około powrócił do Polski Kazimierz Odnowiciel?", 
+   opts:["1017","1039","1106","1138"], a:1,
+   exp:"Kazimierz Odnowiciel powrócił do Polski około 1039 roku."},
+
+  {q:"Które wydarzenie było przyczyną kryzysu państwa w pierwszej połowie XI wieku?", 
+   opts:["najazdy i bunt ludności","epidemia","susza","brak następcy tronu"], a:0,
+   exp:"Przyczyną były najazdy (niemieckie, czeskie, ruskie) oraz bunt ludności."},
+
+  {q:"Jakie ziemie odzyskał Kazimierz Odnowiciel i uczynił ważnym ośrodkiem władzy?", 
+   opts:["Gniezno","Kraków","Poznań","Szczecin"], a:1,
+   exp:"Kazimierz przeniósł siedzibę władzy do Krakowa i odbudował państwo."},
+
+  {q:"Kto był następcą Bolesława Śmiałego według materiału?", 
+   opts:["Mieszko II","Władysław Herman","Kazimierz Odnowiciel","Bolesław Krzywousty"], a:1,
+   exp:"Następcą Bolesława Śmiałego był jego brat Władysław Herman."},
+
+  {q:"Jak nazywał się możny, który odgrywał dużą rolę za panowania Władysława Hermana?", 
+   opts:["Sieciech","Zbigniew","Mieszko","Rycheza"], a:0,
+   exp:"Sieciech był wpływowym możnym w państwie Władysława Hermana."},
+
+  {q:"Co zrobił Bolesław Krzywousty, aby przywrócić Polsce dostęp do morza?", 
+   opts:["podbił Pomorze Gdańskie i Zachodnie","kupił porty","zawarł pokój z Niemcami","zbudował flotę"], a:0,
+   exp:"Bolesław zdobył Pomorze Gdańskie i później Pomorze Zachodnie (m.in. Kołobrzeg)."}, 
+
+  {q:"W którym roku Bolesław Krzywousty zdobył Kołobrzeg i umocnił wpływy na Pomorzu Zachodnim?", 
+   opts:["1106","1122","1138","1079"], a:1,
+   exp:"Zdobycie Kołobrzegu i zakończenie walk na Pomorzu Zachodnim datuje się na 1122 rok."},
+
+  {q:"Co oznacza zasada senioratu w testamencie Bolesława Krzywoustego?", 
+   opts:["najstarszy syn ma władzę zwierzchnią","każdy syn rządził niezależnie","król wybierał następcę","władza przechodziła na szlachtę"], a:0,
+   exp:"Seniorat przewidywał, że najstarszy syn (senior) ma władzę zwierzchnią nad państwem."},
+
+  {q:"W którym roku zmarł Bolesław Krzywousty, co zapoczątkowało rozbicie dzielnicowe?", 
+   opts:["1106","1122","1138","1150"], a:2,
+   exp:"Bolesław Krzywousty zmarł w 1138 roku; wtedy wprowadzono podział kraju."},
+
+  {q:"Jakie było jedno z zagrożeń wynikających z podziału kraju między synów Bolesława?", 
+   opts:["wzmocnienie jedności państwa","bratobójcze wojny i osłabienie jedności","szybki rozwój gospodarczy","utrata religii"], a:1,
+   exp:"Podział prowadził do konfliktów między braćmi i osłabienia państwa."},
+
+  {q:"Kto opisał obronę Głogowa i okrutny podstęp Henryka V w kronice?", 
+   opts:["Gall Anonim","Wincenty Kadłubek","Jan Długosz","Gallus"], a:0,
+   exp:"Opis obrony Głogowa pochodzi z Kroniki polskiej autorstwa Galla Anonima."},
+
+  {q:"Jaką taktykę zastosowali Niemcy podczas oblężenia Głogowa według kronikarza?", 
+   opts:["przywiązali zakładników do machin oblężniczych","podpalili miasto","użyli trucizn","zawarli układ"], a:0,
+   exp:"Niemcy przywiązali zakładników (mieszkańców) do machin, by zmusić obrońców do kapitulacji."},
+
+  {q:"Jaki był skutek postawy mieszkańców Głogowa podczas oblężenia?", 
+   opts:["poddali się natychmiast","odparli atak i Niemcy odstąpili","miasto zostało zdobyte","mieszkańcy uciekli"], a:1,
+   exp:"Mieszkańcy bronili się mimo okrucieństwa, odparli atak i obrońcy odnieśli sukces."},
+
+  {q:"Które z poniższych wydarzeń miało miejsce w 1106 roku?", 
+   opts:["podbój Pomorza Gdańskiego przez Bolesława","Bolesław zdobył Kołobrzeg","Bolesław podbił Pomorze Gdańskie w 1106 roku","testament Bolesława"], a:2,
+   exp:"W 1106 roku Bolesław podbił i przyłączył Pomorze Gdańskie."},
+
+  {q:"Co powstało na Pomorzu Zachodnim po zwycięstwach Bolesława Krzywoustego?", 
+   opts:["nowa organizacja kościelna z biskupem w Wolinie","niezależne księstwo","państwo niemieckie","nic się nie zmieniło"], a:0,
+   exp:"Na Pomorzu Zachodnim powstała organizacja kościelna z biskupem w Wolinie."},
+
+  {q:"Jak nazywał się brat Bolesława Krzywoustego, z którym toczył walki o władzę?", 
+   opts:["Zbigniew","Mieszko","Kazimierz","Sieciech"], a:0,
+   exp:"Zbigniew był bratem Bolesława i uczestniczył w walkach o władzę."},
+
+  {q:"Co oznacza termin 'grod' używany w tekstach źródłowych?", 
+   opts:["rodzaj broni","warowny ośrodek, twierdza","świątynia","rodzinne imię"], a:1,
+   exp:"Grod to warowny ośrodek lub twierdza w średniowieczu."},
+
+  {q:"Które z poniższych miast było ważną twierdzą na Pomorzu Zachodnim zdobywaną przez Bolesława?", 
+   opts:["Gdańsk","Kołobrzeg","Kraków","Poznań"], a:1,
+   exp:"Kołobrzeg był główną twierdzą na Pomorzu Zachodnim zdobywaną w 1122 r."},
+
+  {q:"Jakie znaczenie miało odzyskanie dostępu do morza dla Polski w średniowieczu?", 
+   opts:["umożliwiło handel i kontakty morskie","nie miało znaczenia","spowodowało izolację","zwiększyło podatki"], a:0,
+   exp:"Dostęp do morza ułatwiał handel, kontakty międzynarodowe i rozwój portów."},
+
+  {q:"Kto był autorem Kroniki polskiej, która opisuje wydarzenia z czasów Bolesława Krzywoustego?", 
+   opts:["Gall Anonim","Jan Długosz","Wincenty Kadłubek","Gallus Anonim"], a:0,
+   exp:"Gall Anonim (znany też jako Gallus) jest autorem Kroniki polskiej."},
+
+  {q:"Co to jest testament Bolesława Krzywoustego w kontekście historii Polski?", 
+   opts:["dokument dzielący państwo między synów","umowa z Niemcami","kodeks prawny","list do papieża"], a:0,
+   exp:"Testament to dokument, w którym Bolesław podzielił kraj między synów i ustanowił seniorat."},
+
+  {q:"Które z poniższych było konsekwencją wprowadzenia zasady senioratu?", 
+   opts:["zapewnienie trwałego pokoju","częste spory o władzę między książętami","silne państwo centralne","utrata ziemi przez szlachtę"], a:1,
+   exp:"Zasada senioratu nie zapobiegła sporom; prowadziła do walk o władzę."},
+
+  {q:"Jak nazywał się władca, który w 1017 roku prowadził wyprawy przeciw Czechom i Niemcom?", 
+   opts:["Mieszko II","Bolesław Chrobry","Kazimierz Odnowiciel","Bolesław Śmiały"], a:0,
+   exp:"W 1017 roku Mieszko II prowadził wyprawy przeciw Czechom i Niemcom."},
+
+  {q:"Co oznacza termin 'lenno' w kontekście średniowiecznych stosunków politycznych?", 
+   opts:["ziemia oddana w zależność feudalną","rodzaj podatku","twierdza obronna","świątynia"], a:0,
+   exp:"Lenno to ziemia oddana w zależność feudalną innemu władcy."},
+
+  {q:"Które ziemie Kazimierz Odnowiciel oddał Czechom jako lenno?", 
+   opts:["Pomorze Gdańskie","Pomorze Zachodnie","Mazowsze","Pomorze Gdańskie jako lenno"], a:3,
+   exp:"Kazimierz oddał Pomorze Gdańskie Czechom jako lenno (w pewnym okresie)."}, 
+
+  {q:"Jakie były insygnia królewskie, które Mieszko II utracił w czasie kryzysu?", 
+   opts:["korona, berło, jabłko","miecz, tarcza, hełm","korona i miecz","berło i sztandar"], a:0,
+   exp:"Mieszko II utracił insygnia królewskie: korona, berło i jabłko."},
+
+  {q:"Co było jednym z efektów najazdów i buntów w 1038 roku?", 
+   opts:["wzmocnienie państwa","upadek Kościoła i państwa, utrata korony","pokój z Czechami","rozkwit handlu"], a:1,
+   exp:"Najazdy i bunt doprowadziły do upadku państwa i utraty korony."},
+
+  {q:"Jak nazywał się biskup, którego śmierć była przyczyną buntu przeciw Bolesławowi Śmiałemu?", 
+   opts:["Stanisław","Wojciech","Jakub","Mieszko"], a:0,
+   exp:"Biskup Stanisław został skazany na śmierć, co wywołało bunt przeciw królowi."},
+
+  {q:"Co oznacza termin 'grodzianie' użyty w kronice o obronie Głogowa?", 
+   opts:["mieszkańcy grodu","rycerze niemieccy","kupcy","księża"], a:0,
+   exp:"Grodzianie to mieszkańcy grodu (warownego ośrodka)."}, 
+
+  {q:"Które z poniższych wydarzeń miało miejsce po śmierci Władysława Hermana?", 
+   opts:["pokój między synami","wojna między jego synami","utrata Pomorza","przeniesienie stolicy do Gniezna"], a:1,
+   exp:"Po śmierci Władysława Hermana doszło do wojny między jego synami."},
+
+  {q:"Jak nazywał się możny, który został pokonany przez Zbigniewa i Bolesława Krzywoustego?", 
+   opts:["Sieciech","Rycheza","Mieszko","Kazimierz"], a:0,
+   exp:"Sieciech został pokonany przez Zbigniewa i Bolesława Krzywoustego."},
+
+  {q:"Które z poniższych miast stało się ważnym ośrodkiem władzy za Kazimierza Odnowiciela?", 
+   opts:["Gniezno","Kraków","Poznań","Sandomierz"], a:1,
+   exp:"Kraków stał się główną siedzibą władzy za Kazimierza Odnowiciela."},
+
+  {q:"Co było jednym z zadań ucznia w sekcji 'Praca z mapą' w podręczniku?", 
+   opts:["wskazać dzielnice i grody","narysować port","napisać wiersz","przetłumaczyć tekst"], a:0,
+   exp:"Zadanie polegało na wskazaniu dzielnic i grodów na mapie."},
+
+  {q:"Który z władców przyłączył Pomorze Gdańskie do Polski?", 
+   opts:["Mieszko II","Bolesław Krzywousty","Kazimierz Odnowiciel","Bolesław Śmiały"], a:1,
+   exp:"Bolesław Krzywousty przyłączył Pomorze Gdańskie (około 1106)."}, 
+
+  {q:"Jakie były główne skutki rozbicia dzielnicowego zapoczątkowanego po 1138 roku?", 
+   opts:["wzmocnienie państwa","osłabienie jedności i częste konflikty","szybki rozwój handlu","utrata języka"], a:1,
+   exp:"Rozbicie dzielnicowe osłabiło jedność państwa i prowadziło do konfliktów."},
+
+  {q:"Co oznacza termin 'senior' w systemie senioratu?", 
+   opts:["najmłodszy książę","najstarszy książę z władzami zwierzchnimi","biskup","król obcy"], a:1,
+   exp:"Senior to najstarszy książę, który miał władzę zwierzchnią."},
+
+  {q:"Które z poniższych wydarzeń miało miejsce w 1122 roku?", 
+   opts:["zdobycie Kołobrzegu","testament Bolesława","śmierć Kazimierza","koronacja Mieszka II"], a:0,
+   exp:"W 1122 roku zakończyły się walki na Pomorzu Zachodnim zdobyciem Kołobrzegu."},
+
+  {q:"Jakie znaczenie miała organizacja kościelna na Pomorzu Zachodnim po zdobyciu tych ziem?", 
+   opts:["ułatwiała chrystianizację i administrację","była bez znaczenia","zniszczyła miejscowe zwyczaje","spowodowała bunt"], a:0,
+   exp:"Organizacja kościelna wspierała chrystianizację i porządek administracyjny."},
+
+  {q:"Kto był autorem kroniki, która opisała okrucieństwo Henryka V przy oblężeniu Głogowa?", 
+   opts:["Gall Anonim","Jan Długosz","Wincenty Kadłubek","Gallus"], a:0,
+   exp:"Gall Anonim opisał oblężenie Głogowa i podstęp Henryka V."},
+
+  {q:"Jakie były reakcje mieszkańców Głogowa na widok przywiązanych zakładników według kroniki?", 
+   opts:["płakali, modlili się, chwycili za broń","uciekli","poddali się","zawarli pokój"], a:0,
+   exp:"Mieszkańcy reagowali płaczem, modlitwą i chwyceniem za broń, a mimo to bronili grodu."},
+
+  {q:"Który z władców był znany jako 'Odnowiciel'?", 
+   opts:["Bolesław Krzywousty","Kazimierz Odnowiciel","Mieszko II","Władysław Herman"], a:1,
+   exp:"Kazimierz Odnowiciel otrzymał ten przydomek za odbudowę państwa i Kościoła."},
+
+  {q:"Co było jednym z zadań ucznia w sekcji 'Sprawdź się' w podręczniku?", 
+   opts:["wyjaśnić przyczyny kryzysu, opisać postawy, wymienić grody","narysować portret króla","przetłumaczyć tekst na łacinę","napisać opowiadanie"], a:0,
+   exp:"Zadania polegały na analizie przyczyn kryzysu, opisie postaw i wskazaniu grodów."},
+
+  {q:"Jakie terytoria są wymieniane jako sąsiedzi Polski na mapach z XI–XII wieku?", 
+   opts:["Królestwo Węgierskie i Księstwo Kijowskie","Hiszpania i Portugalia","Anglia i Francja","Szwecja i Norwegia"], a:0,
+   exp:"Na mapach sąsiednimi państwami były m.in. Królestwo Węgierskie i Księstwo Kijowskie."},
+
+  {q:"Co oznacza termin 'grodzisko' w kontekście średniowiecznej topografii?", 
+   opts:["miejsce po dawnym grodzie","rodzaj broni","świątynia","rzeka"], a:0,
+   exp:"Grodzisko to pozostałość po dawnym grodzie (kopiec, wał)."}, 
+
+  {q:"Który z władców był ojcem Bolesława Krzywoustego?", 
+   opts:["Władysław Herman","Mieszko II","Kazimierz Odnowiciel","Bolesław Chrobry"], a:0,
+   exp:"Władysław Herman był ojcem Bolesława Krzywoustego."},
+
+  {q:"Jakie były główne zadania seniora według testamentu?", 
+   opts:["reprezentowanie państwa i utrzymanie jedności","pobieranie podatków tylko","dowodzenie flotą","bycie biskupem"], a:0,
+   exp:"Senior miał reprezentować państwo i pełnić funkcję zwierzchnią nad innymi książętami."},
+
+  {q:"Co było jednym z powodów, dla których Bolesław Krzywousty prowadził wyprawy na Pomorze?", 
+   opts:["chęć rozszerzenia wpływów i chrystianizacji","poszukiwanie złota","ucieczka przed wrogiem","zmiana stolicy"], a:0,
+   exp:"Celem było rozszerzenie wpływów, przyłączenie ziem i szerzenie chrześcijaństwa."},
+
+  {q:"Jak nazywa się dokument, w którym Bolesław Krzywousty podzielił państwo między synów?", 
+   opts:["testament","konstytucja","traktat","dekret"], a:0,
+   exp:"To dokument nazywany testamentem Bolesława Krzywoustego."},
+
+  {q:"Które z poniższych stwierdzeń o Mieszku II jest prawdziwe?", 
+   opts:["był młodszym synem Bolesława Chrobrego i panował w XI w.","był królem w XIII w.","był papieżem","był władcą w XVI w."], a:0,
+   exp:"Mieszko II był młodszym synem Bolesława Chrobrego i panował w XI wieku."},
+
+  {q:"Co oznacza termin 'rozbicie dzielnicowe' w historii Polski?", 
+   opts:["podział państwa na dzielnice rządzone przez synów","zjednoczenie kraju","utrata języka","zmiana religii"], a:0,
+   exp:"Rozbicie dzielnicowe to podział państwa na dzielnice rządzone przez potomków władcy."},
+
+  {q:"Które z poniższych było jednym z efektów polityki Bolesława Krzywoustego?", 
+   opts:["wzmocnienie pozycji Polski w regionie","izolacja kraju","utrata wszystkich ziem","przeniesienie stolicy do Gdańska"], a:0,
+   exp:"Bolesław wzmocnił pozycję Polski w Europie Środkowej i przyłączył Pomorze."},
+
+  {q:"Jak nazywała się główna twierdza Pomorza Zachodniego zdobyta przez Bolesława?", 
+   opts:["Wolin","Kołobrzeg","Gdańsk","Szczecin"], a:1,
+   exp:"Kołobrzeg był główną twierdzą Pomorza Zachodniego zdobywaną w 1122 r."},
+
+  {q:"Które z poniższych określeń najlepiej pasuje do Galla Anonima?", 
+   opts:["kronikarz średniowieczny","król","biskup","kupiec"], a:0,
+   exp:"Gall Anonim był kronikarzem, autorem Kroniki polskiej."},
+
+  {q:"Co było jednym z zadań obrońców Głogowa według kroniki?", 
+   opts:["bronić grodu mimo obecności zakładników","poddać się natychmiast","uciec do lasu","zawrzeć sojusz"], a:0,
+   exp:"Obrońcy bronili grodu mimo że zakładnicy byli przywiązani do machin."},
+
+  {q:"Które z poniższych wydarzeń przyczyniło się do upadku Bolesława Śmiałego?", 
+   opts:["skazanie biskupa Stanisława na śmierć i bunt","zwycięstwo nad Niemcami","pokój z Czechami","podbój Pomorza"], a:0,
+   exp:"Skazanie biskupa i wynikający z tego bunt doprowadziły do utraty władzy przez Bolesława."},
+
+  {q:"Jakie były główne elementy uzbrojenia wymienione w tekście o obronie Głogowa?", 
+   opts:["machiny oblężnicze, broń obrońców, konie","działo, karabiny, samoloty","łuki, proce, armaty","pancerze, działa, karabiny"], a:0,
+   exp:"Kronikarz wspominał o machinach oblężniczych, broni obrońców i koniach."},
+
+  {q:"Co oznacza termin 'praca z tekstem źródłowym' w podręczniku?", 
+   opts:["analiza fragmentu kroniki lub dokumentu","pisanie opowiadania","rysowanie mapy","śpiewanie pieśni"], a:0,
+   exp:"Praca z tekstem źródłowym polega na analizie fragmentu kroniki lub innego dokumentu."},
+
+  {q:"Które z poniższych było celem miniprojektu wymienionego w podręczniku?", 
+   opts:["przedstawienie na mapie dzielnic po śmierci Bolesława i wnioski","narysowanie portu","przetłumaczenie kroniki","zbudowanie modelu grodu"], a:0,
+   exp:"Miniprojekt polegał na przedstawieniu dzielnic na mapie i zapisaniu wniosków."},
+
+  {q:"Jakie były główne regiony, które Kazimierz Odnowiciel odzyskał lub umocnił?", 
+   opts:["Śląsk, Małopolska, Mazowsze","Pomorze Zachodnie, Pomorze Gdańskie","Wielkopolska tylko","Mazowsze tylko"], a:0,
+   exp:"Kazimierz odzyskał Śląsk, Małopolskę i przyłączył Mazowsze."},
+
+  {q:"Co oznacza termin 'bunt ludności' w kontekście kryzysu XI wieku?", 
+   opts:["sprzeciw ludności wobec władzy książęcej i chrześcijaństwa","pokój społeczny","wzrost handlu","nowe prawa"], a:0,
+   exp:"Bunt ludności to sprzeciw przeciwko władzy książęcej i narzuconej religii."},
+
+  {q:"Które z poniższych stwierdzeń o Władysławie Hermanie jest prawdziwe?", 
+   opts:["był ojcem Bolesława Krzywoustego i panował w Polsce","był królem Anglii","był papieżem","był władcą w XVI wieku"], a:0,
+   exp:"Władysław Herman był ojcem Bolesława Krzywoustego i panował w Polsce."},
+
+  {q:"Jakie znaczenie miała obrona Głogowa dla pamięci historycznej Polski?", 
+   opts:["pokazuje odwagę obrońców i opór wobec agresora","nie ma znaczenia","była porażką","doprowadziła do utraty ziem"], a:0,
+   exp:"Obrona Głogowa jest symbolem odwagi i oporu wobec agresji."},
+
+  {q:"Które z poniższych było jednym z efektów polityki Bolesława Krzywoustego wobec Pomorza?", 
+   opts:["rozszerzenie wpływów Polski i chrystianizacja terenów","utrata wpływów","izolacja kraju","utrata religii"], a:0,
+   exp:"Polityka Bolesława doprowadziła do przyłączenia Pomorza i rozwoju kościoła."},
+
+  {q:"Jakie zadanie miał senior według zasady senioratu poza reprezentacją państwa?", 
+   opts:["utrzymanie porządku i zwierzchnia władza nad książętami","bycie jedynie symbolem","prowadzenie handlu","bycie biskupem"], a:0,
+   exp:"Senior miał utrzymywać porządek i pełnić władzę zwierzchnią nad książętami."},
+
+  {q:"Które z poniższych wydarzeń nastąpiło najpóźniej chronologicznie?", 
+   opts:["powrót Kazimierza około 1039","podbój Pomorza Gdańskiego 1106","zdobycie Kołobrzegu 1122","śmierć Bolesława Krzywoustego 1138"], a:3,
+   exp:"Śmierć Bolesława w 1138 roku jest najpóźniejszym z wymienionych wydarzeń."}
+];
+
+/* Upewnij się, że mamy dokładnie 60 pytań; jeśli mniej, powielamy niektóre z lekką modyfikacją (dla kompletności testu) */
+(function ensureSixty(){
+  const base = questions.slice();
+  let i = 0;
+  while(questions.length < 60){
+    const src = base[i % base.length];
+    // sklonuj i ewentualnie drobnie zmodyfikuj tekst (np. dodać " (powt.)")
+    const clone = JSON.parse(JSON.stringify(src));
+    clone.q = clone.q + (questions.length < base.length ? "" : " (powtórzenie)");
+    questions.push(clone);
+    i++;
+  }
+})();
+
+/* Logika quizu */
+let idx = 0;
+const total = questions.length;
+const qcountEl = document.getElementById('qcount');
+const questionEl = document.getElementById('question');
+const optionsEl = document.getElementById('options');
+const feedbackArea = document.getElementById('feedbackArea');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const progressBar = document.getElementById('progressBar');
+
+const state = {
+  answers: Array(total).fill(null) // null / {choice: index, correct: bool}
+};
+
+function render(){
+  const item = questions[idx];
+  qcountEl.textContent = `Pytanie ${idx+1} z ${total}`;
+  questionEl.textContent = item.q;
+  optionsEl.innerHTML = '';
+  feedbackArea.innerHTML = '';
+
+  item.opts.forEach((optText, iOpt) => {
+    const btn = document.createElement('div');
+    btn.className = 'opt';
+    btn.tabIndex = 0;
+    btn.innerHTML = `<strong>${String.fromCharCode(65+iOpt)}.</strong>&nbsp;<span>${optText}</span>`;
+    btn.onclick = () => selectOption(iOpt);
+    btn.onkeypress = (e) => { if(e.key === 'Enter' || e.key === ' ') selectOption(iOpt); };
+    optionsEl.appendChild(btn);
+  });
+
+  // jeśli już odpowiedziano, pokaż wynik i zablokuj opcje
+  const prevAns = state.answers[idx];
+  if(prevAns){
+    markAnswered(prevAns.choice, prevAns.correct);
+    showExplanation(prevAns.correct, questions[idx].exp);
+  }
+
+  prevBtn.disabled = idx === 0;
+  nextBtn.textContent = idx === total-1 ? 'Zakończ' : 'Następne';
+  updateProgress();
+}
+
+function selectOption(choice){
+  // jeśli już odpowiedziano, ignoruj
+  if(state.answers[idx]) return;
+  const correctIndex = questions[idx].a;
+  const isCorrect = choice === correctIndex;
+  state.answers[idx] = {choice, correct: isCorrect};
+  markAnswered(choice, isCorrect);
+  showExplanation(isCorrect, questions[idx].exp);
+}
+
+function markAnswered(choice, isCorrect){
+  const optNodes = Array.from(optionsEl.children);
+  optNodes.forEach((node, i) => {
+    node.classList.add('disabled');
+    if(i === choice){
+      node.classList.add(isCorrect ? 'correct' : 'wrong');
+    }
+    if(i === questions[idx].a && i !== choice){
+      // pokaż poprawną odpowiedź, jeśli użytkownik wybrał źle
+      node.style.outline = '2px solid rgba(31,138,76,0.12)';
+    }
+  });
+}
+
+function showExplanation(isCorrect, explanation){
+  const div = document.createElement('div');
+  div.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+  div.textContent = isCorrect ? 'Dobra odpowiedź.' : 'Niestety, to niepoprawne.';
+  feedbackArea.appendChild(div);
+
+  const expl = document.createElement('div');
+  expl.className = 'explain';
+  expl.textContent = explanation || '';
+  feedbackArea.appendChild(expl);
+}
+
+function nextQ(){
+  if(idx < total - 1){
+    idx++;
+    render();
+    window.scrollTo({top:0,behavior:'smooth'});
+  } else {
+    // zakończ test — pokaż podsumowanie
+    showSummary();
+  }
+}
+
+function prevQ(){
+  if(idx > 0){
+    idx--;
+    render();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+
+function updateProgress(){
+  const answered = state.answers.filter(Boolean).length;
+  const pct = Math.round((answered/total)*100);
+  progressBar.style.width = pct + '%';
+}
+
+function showSummary(){
+  const answered = state.answers.filter(Boolean).length;
+  const correct = state.answers.filter(a => a && a.correct).length;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="qcount">Wynik testu</div>
+    <div style="font-size:20px;font-weight:700;margin-top:8px">${correct} / ${total} poprawnych odpowiedzi</div>
+    <p style="color:var(--muted);margin-top:8px">Odpowiedziałeś na ${answered} pytań. Możesz przejrzeć pytania ponownie, klikając poniżej.</p>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button id="reviewBtn">Przejrzyj pytania</button>
+      <button class="secondary" id="restartBtn">Rozpocznij ponownie</button>
+    </div>
+    <div style="margin-top:12px;color:var(--muted);font-size:13px">Po zakończeniu możesz wrócić do dowolnego pytania, korzystając z przycisku "Przejrzyj pytania".</div>
+  `;
+  document.getElementById('reviewBtn').onclick = () => { idx = 0; rebuildCard(); render(); };
+  document.getElementById('restartBtn').onclick = () => { resetQuiz(); };
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function rebuildCard(){
+  // przywróć oryginalny HTML struktury quizu
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="qcount" id="qcount">Pytanie 1 z ${total}</div>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+    <div id="feedbackArea"></div>
+    <div class="controls">
+      <div style="flex:1">
+        <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="secondary" id="prevBtn" onclick="prevQ()" disabled>Poprzednie</button>
+        <button id="nextBtn" onclick="nextQ()">Następne</button>
+      </div>
+    </div>
+  `;
+  // rebind elements
+  qcountEl = document.getElementById('qcount');
+  questionEl = document.getElementById('question');
+  optionsEl = document.getElementById('options');
+  feedbackArea = document.getElementById('feedbackArea');
+  prevBtn = document.getElementById('prevBtn');
+  nextBtn = document.getElementById('nextBtn');
+  progressBar = document.getElementById('progressBar');
+}
+
+function resetQuiz(){
+  for(let i=0;i<state.answers.length;i++) state.answers[i]=null;
+  idx = 0;
+  // odtwórz oryginalny układ (proste rozwiązanie: przeładowanie strony)
+  location.reload();
+}
+
+/* Inicjalizacja */
+render();
+
+/* Ułatwienia klawiaturowe: strzałki do nawigacji */
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowRight') nextQ();
+  if(e.key === 'ArrowLeft') prevQ();
+});
+</script>
+</body>
+</html>
