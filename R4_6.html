@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Historyczny – Polska Pierwszych Piastów</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9972a;
+    --dark-gold: #9a6f1a;
+    --red: #8b1a1a;
+    --parchment: #f5edd6;
+    --parchment2: #ede0c4;
+    --dark: #1a1209;
+    --correct: #2a7a3b;
+    --wrong: #8b1a1a;
+    --shadow: 0 4px 24px rgba(0,0,0,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 60px 0;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, #3a1a00 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, #1a0a00 0%, transparent 60%);
+  }
+
+  header {
+    width: 100%;
+    text-align: center;
+    padding: 36px 20px 24px;
+    background: linear-gradient(180deg, #0d0800 0%, transparent 100%);
+    border-bottom: 2px solid var(--gold);
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    letter-spacing: 2px;
+    text-shadow: 0 2px 12px rgba(201,151,42,0.4);
+  }
+
+  header p {
+    color: #c8b98a;
+    margin-top: 8px;
+    font-size: 1rem;
+  }
+
+  .scoreboard {
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .score-box {
+    background: rgba(201,151,42,0.12);
+    border: 1.5px solid var(--gold);
+    border-radius: 10px;
+    padding: 10px 28px;
+    text-align: center;
+    color: var(--parchment);
+    font-family: 'Cinzel', serif;
+  }
+
+  .score-box .score-num {
+    font-size: 2rem;
+    color: var(--gold);
+    font-weight: 800;
+    display: block;
+  }
+
+  .score-box .score-label {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    opacity: 0.75;
+  }
+
+  .quiz-container {
+    width: 100%;
+    max-width: 760px;
+    padding: 0 16px;
+  }
+
+  .question-card {
+    background: var(--parchment);
+    border-radius: 14px;
+    box-shadow: var(--shadow), 0 0 0 3px var(--dark-gold);
+    margin-bottom: 28px;
+    overflow: hidden;
+    animation: fadeIn 0.4s ease;
+    position: relative;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-header {
+    background: linear-gradient(90deg, var(--red) 0%, #6b1111 100%);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .question-num {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 0.85rem;
+    font-weight: 800;
+    background: rgba(0,0,0,0.3);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .question-text {
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.02rem;
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .options {
+    padding: 16px 18px 18px;
+    display: grid;
+    gap: 9px;
+  }
+
+  .option-btn {
+    background: var(--parchment2);
+    border: 2px solid #c9a96e;
+    border-radius: 8px;
+    padding: 10px 16px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.97rem;
+    color: var(--dark);
+    transition: background 0.18s, border-color 0.18s, transform 0.12s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    background: #e8d5a3;
+    border-color: var(--gold);
+    transform: translateX(3px);
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  .option-btn .opt-letter {
+    font-family: 'Cinzel', serif;
+    font-weight: 800;
+    color: var(--red);
+    min-width: 22px;
+    font-size: 1rem;
+  }
+
+  .option-btn.correct {
+    background: #d4edda;
+    border-color: var(--correct);
+    color: #145222;
+  }
+
+  .option-btn.correct .opt-letter { color: var(--correct); }
+
+  .option-btn.wrong {
+    background: #f8d7da;
+    border-color: var(--wrong);
+    color: #6b1a1a;
+  }
+
+  .option-btn.wrong .opt-letter { color: var(--wrong); }
+
+  .option-btn.reveal-correct {
+    background: #d4edda;
+    border-color: var(--correct);
+    opacity: 0.75;
+  }
+
+  .feedback {
+    margin: 0 18px 14px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .feedback.show { display: flex; }
+
+  .feedback.correct-fb {
+    background: #d4edda;
+    color: #145222;
+    border: 1.5px solid var(--correct);
+  }
+
+  .feedback.wrong-fb {
+    background: #f8d7da;
+    color: #6b1a1a;
+    border: 1.5px solid var(--wrong);
+  }
+
+  .feedback .fb-icon { font-size: 1.3rem; }
+
+  .progress-bar-wrap {
+    width: 100%;
+    max-width: 760px;
+    padding: 0 16px;
+    margin-bottom: 22px;
+  }
+
+  .progress-bar-bg {
+    background: #2a1a00;
+    border-radius: 20px;
+    height: 10px;
+    overflow: hidden;
+    border: 1px solid var(--gold);
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), #f0c040);
+    border-radius: 20px;
+    transition: width 0.4s;
+    width: 0%;
+  }
+
+  .progress-label {
+    color: #c8b98a;
+    font-size: 0.82rem;
+    margin-bottom: 5px;
+    text-align: right;
+  }
+
+  .result-section {
+    display: none;
+    width: 100%;
+    max-width: 760px;
+    padding: 0 16px;
+    margin-top: 10px;
+  }
+
+  .result-card {
+    background: var(--parchment);
+    border-radius: 16px;
+    box-shadow: var(--shadow), 0 0 0 3px var(--gold);
+    padding: 40px 30px;
+    text-align: center;
+  }
+
+  .result-card h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--red);
+    font-size: 2rem;
+    margin-bottom: 12px;
+  }
+
+  .result-score {
+    font-family: 'Cinzel', serif;
+    font-size: 3.5rem;
+    color: var(--gold);
+    font-weight: 800;
+    display: block;
+    margin: 10px 0;
+  }
+
+  .result-msg {
+    color: #5a3a10;
+    font-size: 1.1rem;
+    margin: 12px 0 24px;
+  }
+
+  .restart-btn {
+    background: linear-gradient(90deg, var(--red), #6b1111);
+    color: var(--gold);
+    border: 2px solid var(--gold);
+    border-radius: 10px;
+    padding: 12px 32px;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+
+  .restart-btn:hover { opacity: 0.85; transform: scale(1.04); }
+
+  .crown { font-size: 3rem; display: block; margin-bottom: 8px; }
+
+  @media (max-width: 500px) {
+    .question-text { font-size: 0.93rem; }
+    .option-btn { font-size: 0.9rem; padding: 9px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚔️ Quiz Historyczny ⚔️</h1>
+  <p>Polska Pierwszych Piastów – Klasa 6</p>
+</header>
+
+<div class="scoreboard">
+  <div class="score-box">
+    <span class="score-num" id="correctCount">0</span>
+    <span class="score-label">POPRAWNE</span>
+  </div>
+  <div class="score-box">
+    <span class="score-num" id="wrongCount">0</span>
+    <span class="score-label">BŁĘDNE</span>
+  </div>
+  <div class="score-box">
+    <span class="score-num" id="totalAnswered">0</span>
+    <span class="score-label">ODPOWIEDZIANO</span>
+  </div>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-label" id="progressLabel">0 / 60 pytań</div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progressBar"></div>
+  </div>
+</div>
+
+<div class="quiz-container" id="quizContainer"></div>
+
+<div class="result-section" id="resultSection">
+  <div class="result-card">
+    <span class="crown">👑</span>
+    <h2>Koniec Quizu!</h2>
+    <span class="result-score" id="finalScore"></span>
+    <p class="result-msg" id="finalMsg"></p>
+    <button class="restart-btn" onclick="restartQuiz()">🔄 Spróbuj ponownie</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  // === KRYZYS I ODBUDOWA PAŃSTWA POLSKIEGO ===
+  {
+    q: "Kto został królem Polski po śmierci Bolesława Chrobrego w 1025 roku?",
+    opts: ["Zbigniew", "Mieszko II", "Bezprym", "Kazimierz"],
+    a: 1
+  },
+  {
+    q: "Jak nazywała się żona Mieszka II?",
+    opts: ["Dobronega", "Rycheza", "Adelajda", "Świętosława"],
+    a: 1
+  },
+  {
+    q: "Jakim władcą był Mieszko II? Znał języki:",
+    opts: ["Polski i węgierski", "Grecki i łaciński", "Czeski i rosyjski", "Arabski i hebrajski"],
+    a: 1
+  },
+  {
+    q: "Jakie terytoria Polska utraciła w 1031 roku na skutek ataku cesarstwa i Rusi?",
+    opts: ["Pomorze Gdańskie i Zachodnie", "Mazowsze i Kujawy", "Milsko, Łużyce i Grody Czerwieńskie", "Śląsk i Małopolskę"],
+    a: 2
+  },
+  {
+    q: "Kim był Bezprym?",
+    opts: ["Młodszym bratem Mieszka II", "Starszym bratem Mieszka II", "Synem Mieszka II", "Palatynem Mieszka II"],
+    a: 1
+  },
+  {
+    q: "Co Bezprym odesłał cesarzowi?",
+    opts: ["Miecz koronacyjny", "Insygnia królewskie (koronę, berło i jabłko)", "Relikwie świętego Wojciecha", "Złote monety"],
+    a: 1
+  },
+  {
+    q: "Co oznaczają insygnia królewskie?",
+    opts: ["Dokumenty królewskie", "Korona, berło oraz jabłko królewskie", "Pieczęć i tarcza króla", "Miecz i włócznia"],
+    a: 1
+  },
+  {
+    q: "Kiedy zmarł Mieszko II?",
+    opts: ["W 1025 roku", "W 1031 roku", "W 1034 roku", "W 1038 roku"],
+    a: 2
+  },
+  {
+    q: "Co wydarzyło się w Polsce po śmierci Mieszka II?",
+    opts: ["Nastąpił rozkwit państwa", "Wybuchł bunt możnych i ludności, która chciała przywrócenia pogaństwa", "Polska podbiła Czechy", "Nawiązano pokój z cesarstwem"],
+    a: 1
+  },
+  {
+    q: "W którym roku Czesi spustoszyli Wielkopolskę?",
+    opts: ["W 1025 roku", "W 1031 roku", "W 1034 roku", "W 1038 roku"],
+    a: 3
+  },
+  {
+    q: "Co Czesi wywieźli z Gniezna podczas najazdu?",
+    opts: ["Złoto i srebro królewskie", "Relikwie świętego Wojciecha", "Koronę polską", "Kroniki polskie"],
+    a: 1
+  },
+  {
+    q: "Gdzie uciekł książę Kazimierz, syn Mieszka II?",
+    opts: ["Na Węgry", "Do Francji", "Do Niemiec", "Na Ruś"],
+    a: 2
+  },
+  {
+    q: "Od kogo Kazimierz uzyskał pomoc zbrojną, by wrócić do Polski?",
+    opts: ["Od króla Węgier", "Od cesarza", "Od papieża", "Od króla Francji"],
+    a: 1
+  },
+  {
+    q: "Które miasto stało się główną siedzibą władcy zamiast zniszczonego Gniezna?",
+    opts: ["Wrocław", "Poznań", "Kraków", "Sandomierz"],
+    a: 2
+  },
+  {
+    q: "Dlaczego Kazimierz otrzymał przydomek \"Odnowiciel\"?",
+    opts: ["Bo zdobył koronę królewską", "Bo odbudował państwo polskie i przywrócił chrześcijaństwo", "Bo pokonał Czechów", "Bo zbudował wiele zamków"],
+    a: 1
+  },
+  {
+    q: "Jakie ziemie znalazły się pod władzą Kazimierza Odnowiciela?",
+    opts: ["Śląsk, Mazowsze, Kujawy, Pomorze", "Wielkopolska, Małopolska, Mazowsze i Śląsk", "Tylko Wielkopolska i Małopolska", "Polska, Czechy i Węgry"],
+    a: 1
+  },
+  {
+    q: "Co Kazimierz Odnowiciel odebrał Czechom?",
+    opts: ["Gniezno", "Kraków", "Śląsk", "Wrocław"],
+    a: 2
+  },
+
+  // === PANOWANIE BOLESŁAWA ŚMIAŁEGO ===
+  {
+    q: "Kto objął władzę w Polsce po śmierci Kazimierza Odnowiciela?",
+    opts: ["Władysław Herman", "Zbigniew", "Bolesław Śmiały", "Bolesław Krzywousty"],
+    a: 2
+  },
+  {
+    q: "W którym roku Bolesław Śmiały został koronowany na króla Polski?",
+    opts: ["W 1025 roku", "W 1063 roku", "W 1076 roku", "W 1079 roku"],
+    a: 2
+  },
+  {
+    q: "Co pomogło Bolesławowi Śmiałemu odzyskać arcybiskupstwo w Gnieźnie?",
+    opts: ["Zwycięstwo militarne nad cesarzem", "Poparcie papieża Grzegorza VII w sporze o inwestyturę", "Sojusz z Rusią", "Ślub z córką cesarza"],
+    a: 1
+  },
+  {
+    q: "Kto stał na czele buntu przeciwko Bolesławowi Śmiałemu?",
+    opts: ["Sieciech", "Palatyn Herman", "Biskup krakowski Stanisław", "Zbigniew"],
+    a: 2
+  },
+  {
+    q: "Co spotkało biskupa Stanisława z wyroku Bolesława Śmiałego?",
+    opts: ["Został wygnany z kraju", "Został skazany na śmierć", "Został uwięziony", "Został pozbawiony biskupstwa"],
+    a: 1
+  },
+  {
+    q: "W którym roku Bolesław Śmiały musiał uciec z kraju?",
+    opts: ["W 1063 roku", "W 1076 roku", "W 1079 roku", "W 1102 roku"],
+    a: 2
+  },
+  {
+    q: "Gdzie uciekł Bolesław Śmiały?",
+    opts: ["Na Ruś", "Do Niemiec", "Na Węgry", "Do Czech"],
+    a: 2
+  },
+  {
+    q: "Kiedy narodził się Stanisław, późniejszy biskup krakowski?",
+    opts: ["W 1000 roku", "W 1030 roku", "W 1050 roku", "W 1071 roku"],
+    a: 1
+  },
+  {
+    q: "Kiedy Stanisław został ogłoszony świętym (kanonizowany)?",
+    opts: ["W 1138 roku", "W 1200 roku", "W 1253 roku", "W 1300 roku"],
+    a: 2
+  },
+
+  // === RZĄDY BOLESŁAWA KRZYWOUSTEGO – WŁADYSŁAW HERMAN ===
+  {
+    q: "Kto przejął władzę w Polsce po ucieczce Bolesława Śmiałego?",
+    opts: ["Bolesław Krzywousty", "Zbigniew", "Władysław Herman", "Sieciech"],
+    a: 2
+  },
+  {
+    q: "Jakim tytułem zadowolił się Władysław Herman?",
+    opts: ["Króla", "Cesarza", "Księcia", "Palatyna"],
+    a: 2
+  },
+  {
+    q: "Co to był palatyn w średniowiecznej Polsce?",
+    opts: ["Najwyższy kapłan", "Najwyższy urzędnik państwowy zastępujący władcę", "Wódz wojska", "Doradca królewski do spraw finansów"],
+    a: 1
+  },
+  {
+    q: "Jak nazywał się palatyn Władysława Hermana, który zdobył bardzo silną pozycję?",
+    opts: ["Zbigniew", "Sieciech", "Bolesław", "Miecław"],
+    a: 1
+  },
+  {
+    q: "Kim byli Zbigniew i Bolesław Krzywousty względem siebie?",
+    opts: ["Rodzonymi braćmi", "Przyrodnimi braćmi (mieli wspólnego ojca)", "Kuzynami", "Stryjem i bratankiem"],
+    a: 1
+  },
+  {
+    q: "Co zrobili Zbigniew i Bolesław Krzywousty z Sieciecha?",
+    opts: ["Zamordowali go", "Sprzymierzyli się z nim przeciw ojcu", "Pokonali jego wojska i wygnali go z kraju", "Oddali go cesarzowi"],
+    a: 2
+  },
+  {
+    q: "Co Zbigniew otrzymał po podziale Polski przez Władysława Hermana?",
+    opts: ["Małopolskę i Śląsk", "Wielkopolskę i Kujawy", "Mazowsze", "Pomorze Gdańskie"],
+    a: 1
+  },
+  {
+    q: "Co Bolesław Krzywousty otrzymał po podziale Polski przez ojca?",
+    opts: ["Wielkopolskę i Kujawy", "Mazowsze i Kujawy", "Małopolskę i Śląsk", "Pomorze Zachodnie"],
+    a: 2
+  },
+  {
+    q: "Co zachował dla siebie Władysław Herman?",
+    opts: ["Wielkopolskę", "Małopolskę", "Mazowsze", "Śląsk"],
+    a: 2
+  },
+
+  // === BRATOBÓJCZA WOJNA ===
+  {
+    q: "Kiedy zmarł Władysław Herman?",
+    opts: ["W 1092 roku", "W 1102 roku", "W 1109 roku", "W 1111 roku"],
+    a: 1
+  },
+  {
+    q: "Kto najechał Polskę w 1109 roku, wykorzystując jej osłabienie wojną domową?",
+    opts: ["Czesi z królem Janem", "Rus Kijowska", "Niemcy i Czesi pod dowództwem Henryka V", "Prusowie"],
+    a: 2
+  },
+  {
+    q: "Komu Henryk V udzielił pomocy w 1109 roku?",
+    opts: ["Bolesławowi Krzywoustemu", "Zbigniewowi", "Sieciechowi", "Władysławowi Hermanowi"],
+    a: 1
+  },
+  {
+    q: "Obrona którego grodu podczas najazdu 1109 roku jest szczególnie słynna?",
+    opts: ["Krakowa", "Gniezna", "Głogowa", "Wrocławia"],
+    a: 2
+  },
+  {
+    q: "Kto opisał walkę o Głogów w \"Kronice polskiej\"?",
+    opts: ["Wincenty Kadłubek", "Jan Długosz", "Gall Anonim", "Bolesław Krzywousty"],
+    a: 2
+  },
+  {
+    q: "Jakiego podstępu użył Henryk V podczas oblężenia Głogowa?",
+    opts: ["Podpalił miasto od tyłu", "Przywiązał pojmanych mieszkańców (zakładników) do machin oblężniczych", "Zatruł wodę w studniach", "Wybudował tunel pod murami"],
+    a: 1
+  },
+  {
+    q: "Jak zachowali się mieszkańcy Głogowa wobec zakładników przywiązanych do machin?",
+    opts: ["Poddali gród, by ocalić swoich", "Nie oszczędzali swoich i nadal bronili grodu kamieniami i orężem", "Uciekli przez tylną bramę", "Wysłali posłów do cesarza"],
+    a: 1
+  },
+  {
+    q: "Kiedy Bolesław zawarł porozumienie ze Zbigniewem i zgodził się na jego powrót?",
+    opts: ["W 1102 roku", "W 1109 roku", "W 1111 roku", "W 1116 roku"],
+    a: 2
+  },
+  {
+    q: "Co Bolesław Krzywousty rozkazał uczynić ze Zbigniewem po jego powrocie?",
+    opts: ["Wygnał go ponownie", "Kazał go pojmać i oślepić", "Zamknął go w klasztorze", "Oddał go w lenno cesarzowi"],
+    a: 1
+  },
+
+  // === PANOWANIE BOLESŁAWA KRZYWOUSTEGO – PODBOJE ===
+  {
+    q: "Jakie terytoria Bolesław Krzywousty chciał odzyskać dla Polski?",
+    opts: ["Milsko i Łużyce", "Grody Czerwieńskie", "Pomorze Gdańskie i Zachodnie", "Mazowsze i Kujawy"],
+    a: 2
+  },
+  {
+    q: "W którym roku Bolesław podbił i przyłączył Pomorze Gdańskie?",
+    opts: ["W 1109 roku", "W 1111 roku", "W 1116 roku", "W 1122 roku"],
+    a: 2
+  },
+  {
+    q: "W którym roku Bolesław podporządkował sobie Pomorze Zachodnie?",
+    opts: ["W 1116 roku", "W 1118 roku", "In 1120 roku", "W 1122 roku"],
+    a: 3
+  },
+  {
+    q: "Które grody Bolesław zdobył na Pomorzu Zachodnim w 1122 roku?",
+    opts: ["Gdańsk i Słupsk", "Kołobrzeg i Szczecin", "Wolin i Kamień", "Stargard i Białogard"],
+    a: 1
+  },
+  {
+    q: "Co umożliwiło zdobycie przez Bolesława Krzywoustego Pomorza?",
+    opts: ["Pokój z Niemcami", "Rozszerzenie chrześcijaństwa na te tereny", "Sojusz z Rusią", "Pomoc papieża"],
+    a: 1
+  },
+  {
+    q: "Jaka religia dominowała wśród ludności Pomorza na początku XII wieku?",
+    opts: ["Chrześcijaństwo", "Islam", "Pogaństwo", "Judaizm"],
+    a: 2
+  },
+
+  // === TESTAMENT BOLESŁAWA KRZYWOUSTEGO ===
+  {
+    q: "Czego obawiał się Bolesław Krzywousty po swojej śmierci?",
+    opts: ["Najazdu Niemców", "Kolejnej bratobójczej wojny domowej między synami", "Utraty Pomorza", "Buntu możnych"],
+    a: 1
+  },
+  {
+    q: "Co to jest testament?",
+    opts: ["Zapis praw państwowych", "Dokument, w którym dana osoba rozporządza swoim majątkiem na wypadek śmierci", "Kronika opisująca czyny władcy", "Umowa między władcą a papieżem"],
+    a: 1
+  },
+  {
+    q: "Co Bolesław Krzywousty ogłosił, by uregulować podział władzy po swojej śmierci?",
+    opts: ["Konstytucję", "Statut (testament) Bolesława Krzywoustego", "Kronikę", "Bulla złota"],
+    a: 1
+  },
+  {
+    q: "Co to jest zasada senioratu?",
+    opts: ["Najstarszy z rodu Piastów sprawuje władzę zwierzchnią nad pozostałymi", "Władza przekazywana jest zawsze synowi władcy", "Podział kraju między wszystkich synów po równo", "Władca mianuje następcę wedle własnej woli"],
+    a: 0
+  },
+  {
+    q: "Jak nazywano najstarszego księcia sprawującego władzę zwierzchnią?",
+    opts: ["Juniorem", "Seniorem", "Palatynem", "Kasztelanem"],
+    a: 1
+  },
+  {
+    q: "Jakie uprawnienia miał senior?",
+    opts: ["Tylko zbieranie podatków", "Prawo wypowiadania wojny, reprezentowania państwa za granicą i bicia własnej monety", "Mianowanie biskupów", "Tylko dowodzenie wojskiem"],
+    a: 1
+  },
+  {
+    q: "Kiedy Bolesław Krzywousty umarł i jego testament zaczął obowiązywać?",
+    opts: ["W 1116 roku", "W 1122 roku", "W 1138 roku", "In 1150 roku"],
+    a: 2
+  },
+  {
+    q: "Co stało się wkrótce po śmierci Bolesława Krzywoustego?",
+    opts: ["Polska stała się potęgą europejską", "Synowie zachowali pokój zgodnie z testamentem", "Synowie rozpoczęli bratobójcze walki", "Polska połączyła się z Czechami"],
+    a: 2
+  },
+
+  // === POLSKA NAD BAŁTYKIEM ===
+  {
+    q: "Co było jednym z najważniejszych osiągnięć Bolesława Krzywoustego?",
+    opts: ["Koronacja na króla", "Odzyskanie Pomorza Gdańskiego i Zachodniego", "Podbój Czech", "Zawarcie pokoju z cesarstwem"],
+    a: 1
+  },
+  {
+    q: "W którym roku Polska odrodziła się jako państwo i uzyskała fragment wybrzeża?",
+    opts: ["W 1900 roku", "W 1918 roku", "W 1939 roku", "W 1945 roku"],
+    a: 1
+  },
+  {
+    q: "Ile kilometrów długości ma polskie wybrzeże?",
+    opts: ["Ponad 200 km", "Ponad 300 km", "Ponad 400 km", "Ponad 500 km"],
+    a: 2
+  },
+  {
+    q: "Które z poniższych miast NIE jest wymienionym w podręczniku dużym polskim portem?",
+    opts: ["Gdańsk", "Gdynia", "Warszawa", "Szczecin"],
+    a: 2
+  },
+  {
+    q: "Czego dotyczyła zasada junioratu (juniorzy)?",
+    opts: ["Rządzenia przez najmłodszego brata", "Pozostałych braci poza seniorem, podlegających jego władzy", "Dziedziczenia przez córki", "Synów seniorów, którzy rządzili prowincjami"],
+    a: 1
+  },
+  {
+    q: "Który zamek dominuje nad centrum Szczecina i sięga swymi początkami średniowiecza?",
+    opts: ["Zamek Królewski", "Zamek Książąt Pomorskich", "Zamek Krzyżacki", "Wawel"],
+    a: 1
+  },
+  {
+    q: "Który w wiekach X–XI w Polsce Pierwszych Piastów był najważniejszym centrum kościelnym (arcybiskupstwem)?",
+    opts: ["Kraków", "Wrocław", "Gniezno", "Poznań"],
+    a: 2
+  },
+  {
+    q: "Po śmierci Bolesława Krzywoustego Polska została podzielona między jego synów. Jak ta epoka nazywa się w historii?",
+    opts: ["Epoka zjednoczenia", "Rozbicie dzielnicowe", "Czas wielkich królów", "Złoty wiek Piastów"],
+    a: 1
+  }
+];
+
+let correctCount = 0;
+let wrongCount = 0;
+let answered = 0;
+const total = questions.length;
+
+function buildQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  questions.forEach((q, idx) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${idx}`;
+
+    const letters = ['A', 'B', 'C', 'D'];
+    let optsHtml = q.opts.map((opt, oi) => `
+      <button class="option-btn" onclick="answer(${idx}, ${oi})" id="opt-${idx}-${oi}">
+        <span class="opt-letter">${letters[oi]}.</span> ${opt}
+      </button>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="question-header">
+        <span class="question-num">${idx + 1}</span>
+        <span class="question-text">${q.q}</span>
+      </div>
+      <div class="options">${optsHtml}</div>
+      <div class="feedback" id="fb-${idx}">
+        <span class="fb-icon"></span>
+        <span class="fb-text"></span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function answer(qIdx, optIdx) {
+  const q = questions[qIdx];
+  const correct = q.a;
+  const buttons = document.querySelectorAll(`[id^="opt-${qIdx}-"]`);
+
+  buttons.forEach(btn => btn.disabled = true);
+
+  const chosen = document.getElementById(`opt-${qIdx}-${optIdx}`);
+  const fb = document.getElementById(`fb-${qIdx}`);
+
+  if (optIdx === correct) {
+    chosen.classList.add('correct');
+    fb.classList.add('show', 'correct-fb');
+    fb.querySelector('.fb-icon').textContent = '✅';
+    fb.querySelector('.fb-text').textContent = 'Świetnie! Dobra odpowiedź!';
+    correctCount++;
+    document.getElementById('correctCount').textContent = correctCount;
+  } else {
+    chosen.classList.add('wrong');
+    document.getElementById(`opt-${qIdx}-${correct}`).classList.add('reveal-correct');
+    fb.classList.add('show', 'wrong-fb');
+    fb.querySelector('.fb-icon').textContent = '❌';
+    fb.querySelector('.fb-text').textContent = `Niestety, błąd! Poprawna odpowiedź: ${['A','B','C','D'][correct]}. ${q.opts[correct]}`;
+    wrongCount++;
+    document.getElementById('wrongCount').textContent = wrongCount;
+  }
+
+  answered++;
+  document.getElementById('totalAnswered').textContent = answered;
+  updateProgress();
+
+  if (answered === total) {
+    setTimeout(showResult, 700);
+  }
+
+  // Smooth scroll to next unanswered
+  setTimeout(() => {
+    if (qIdx + 1 < total) {
+      const nextCard = document.getElementById(`card-${qIdx + 1}`);
+      if (nextCard) nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 400);
+}
+
+function updateProgress() {
+  const pct = (answered / total) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${answered} / ${total} pytań`;
+}
+
+function showResult() {
+  document.getElementById('resultSection').style.display = 'block';
+  const pct = Math.round((correctCount / total) * 100);
+  document.getElementById('finalScore').textContent = `${correctCount} / ${total} (${pct}%)`;
+
+  let msg = '';
+  if (pct >= 90) msg = '🏆 Doskonale! Jesteś mistrzem historii Polski!';
+  else if (pct >= 75) msg = '🌟 Bardzo dobrze! Znasz historię Pierwszych Piastów!';
+  else if (pct >= 55) msg = '👍 Nieźle! Warto jeszcze raz przejrzeć materiał.';
+  else if (pct >= 40) msg = '📖 Powtórz lekcje – dasz radę następnym razem!';
+  else msg = '📚 Koniecznie wróć do podręcznika i spróbuj ponownie!';
+
+  document.getElementById('finalMsg').textContent = msg;
+  document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function restartQuiz() {
+  correctCount = 0; wrongCount = 0; answered = 0;
+  document.getElementById('correctCount').textContent = 0;
+  document.getElementById('wrongCount').textContent = 0;
+  document.getElementById('totalAnswered').textContent = 0;
+  document.getElementById('resultSection').style.display = 'none';
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
