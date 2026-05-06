@@ -1,535 +1,874 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Test historyczny — VI klasa (Bolesławowie, kryzys i odbudowa)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz – Polska Pierwszych Piastów (120 pytań)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#f7f9fc;--card:#fff;--accent:#0b63c6;--correct:#1f8a4c;--wrong:#c62828;--muted:#6b7280}
-  body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:#111;margin:0;padding:24px}
-  .wrap{max-width:980px;margin:0 auto}
-  header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
-  header h1{font-size:20px;margin:0}
-  header p{margin:0;color:var(--muted);font-size:14px}
-  .card{background:var(--card);border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(15,23,42,0.06);margin-bottom:16px}
-  .qcount{font-size:13px;color:var(--muted);margin-bottom:8px}
-  .question{font-size:18px;margin:8px 0 14px}
-  .options{display:grid;gap:8px}
-  .opt{background:#f1f5f9;border:1px solid #e6eef8;padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:10px}
-  .opt:hover{background:#e8f0fb}
-  .opt.disabled{cursor:default;opacity:0.85}
-  .opt.correct{background:rgba(31,138,76,0.12);border-color:rgba(31,138,76,0.25)}
-  .opt.wrong{background:rgba(198,40,40,0.08);border-color:rgba(198,40,40,0.18)}
-  .feedback{margin-top:12px;padding:10px;border-radius:8px;font-weight:600}
-  .feedback.correct{color:var(--correct);background:rgba(31,138,76,0.06);border:1px solid rgba(31,138,76,0.12)}
-  .feedback.wrong{color:var(--wrong);background:rgba(198,40,40,0.04);border:1px solid rgba(198,40,40,0.08)}
-  .controls{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:12px}
-  button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600}
-  button.secondary{background:#eef3fb;color:var(--accent);border:1px solid #d7e7fb}
-  .progress{height:10px;background:#e6eef8;border-radius:999px;overflow:hidden}
-  .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#2aa0ff);width:0%}
-  footer{font-size:13px;color:var(--muted);text-align:center;margin-top:18px}
-  .explain{margin-top:10px;color:#24303a;background:#fbfdff;padding:10px;border-radius:8px;border:1px solid #eef6ff;font-size:14px}
-  @media (max-width:560px){.question{font-size:16px}}
+  :root {
+    --gold: #c9972a;
+    --dark-gold: #9a6f1a;
+    --red: #7a1515;
+    --parchment: #f5edd6;
+    --parchment2: #ede0c4;
+    --dark: #130e05;
+    --correct: #1e6b30;
+    --wrong: #8b1a1a;
+    --shadow: 0 4px 28px rgba(0,0,0,0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 70px;
+    background-image:
+      radial-gradient(ellipse at 10% 10%, #2e1200 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 90%, #1a0900 0%, transparent 55%);
+  }
+  header {
+    width: 100%;
+    text-align: center;
+    padding: 30px 20px 20px;
+    border-bottom: 2px solid var(--gold);
+    margin-bottom: 24px;
+    background: linear-gradient(180deg,#0a0600 0%,transparent 100%);
+  }
+  header h1 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+    letter-spacing: 2px;
+    text-shadow: 0 2px 14px rgba(201,151,42,0.45);
+  }
+  header p { color: #c8b98a; margin-top: 6px; font-size: .95rem; }
+
+  .top-bar {
+    width: 100%; max-width: 820px;
+    padding: 0 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+  .score-box {
+    background: rgba(201,151,42,0.10);
+    border: 1.5px solid var(--gold);
+    border-radius: 10px;
+    padding: 8px 24px;
+    text-align: center;
+    color: var(--parchment);
+    font-family: 'Cinzel', serif;
+    min-width: 100px;
+  }
+  .score-box .sn { font-size: 1.9rem; color: var(--gold); font-weight: 800; display: block; line-height: 1.1; }
+  .score-box .sl { font-size: .68rem; letter-spacing: 1px; opacity: .7; }
+
+  .prog-wrap { width: 100%; max-width: 820px; padding: 0 14px; margin-bottom: 20px; }
+  .prog-label { color: #c8b98a; font-size: .8rem; text-align: right; margin-bottom: 4px; }
+  .prog-bg { background: #1e1200; border-radius: 20px; height: 9px; border: 1px solid var(--gold); overflow: hidden; }
+  .prog-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #f0c040); border-radius: 20px; transition: width .35s; width: 0%; }
+
+  .quiz-container { width: 100%; max-width: 820px; padding: 0 14px; }
+
+  .qcard {
+    background: var(--parchment);
+    border-radius: 14px;
+    box-shadow: var(--shadow), 0 0 0 2.5px var(--dark-gold);
+    margin-bottom: 22px;
+    overflow: hidden;
+    animation: fadeUp .35s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .qhead {
+    background: linear-gradient(90deg, var(--red) 0%, #5a1010 100%);
+    padding: 11px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .qnum {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: .8rem;
+    font-weight: 800;
+    background: rgba(0,0,0,.3);
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .qtxt { color: #fff; font-weight: 700; font-size: .98rem; line-height: 1.45; flex: 1; }
+
+  .opts { padding: 13px 16px 15px; display: grid; gap: 8px; }
+  .obtn {
+    background: var(--parchment2);
+    border: 2px solid #c9a96e;
+    border-radius: 8px;
+    padding: 9px 14px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    font-size: .93rem;
+    color: #1a1209;
+    transition: background .15s, border-color .15s, transform .1s;
+    display: flex; align-items: flex-start; gap: 9px;
+  }
+  .obtn:hover:not(:disabled) { background: #e6d19a; border-color: var(--gold); transform: translateX(3px); }
+  .obtn:disabled { cursor: default; }
+  .oltr { font-family:'Cinzel',serif; font-weight:800; color:var(--red); min-width:20px; font-size:.95rem; flex-shrink:0; }
+  .obtn.correct { background:#d4edda; border-color:var(--correct); color:#12481f; }
+  .obtn.correct .oltr { color:var(--correct); }
+  .obtn.wrong { background:#f8d7da; border-color:var(--wrong); color:#6b1a1a; }
+  .obtn.wrong .oltr { color:var(--wrong); }
+  .obtn.reveal { background:#d4edda; border-color:var(--correct); opacity:.72; }
+
+  .fb {
+    margin: 0 16px 12px;
+    padding: 8px 13px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: .9rem;
+    display: none;
+    align-items: flex-start;
+    gap: 7px;
+    line-height: 1.4;
+  }
+  .fb.show { display: flex; }
+  .fb.cfb { background: #d4edda; color: #12481f; border: 1.5px solid var(--correct); }
+  .fb.wfb { background: #f8d7da; color: #6b1a1a; border: 1.5px solid var(--wrong); }
+  .fb .fi { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* RESULT */
+  .result-section { display:none; width:100%; max-width:820px; padding:0 14px; margin-top:10px; }
+  .result-card {
+    background: var(--parchment);
+    border-radius: 16px;
+    box-shadow: var(--shadow), 0 0 0 3px var(--gold);
+    padding: 38px 28px;
+    text-align: center;
+  }
+  .result-card .crown { font-size:3rem; display:block; margin-bottom:8px; }
+  .result-card h2 { font-family:'Cinzel',serif; color:var(--red); font-size:1.9rem; margin-bottom:10px; }
+  .result-score { font-family:'Cinzel',serif; font-size:3.2rem; color:var(--gold); font-weight:800; display:block; margin:8px 0; }
+  .result-msg { color:#5a3a10; font-size:1.05rem; margin:10px 0 22px; }
+
+  .btn-row { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+  .rbtn {
+    border-radius: 10px;
+    padding: 11px 28px;
+    font-family: 'Cinzel', serif;
+    font-size: .95rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: opacity .2s, transform .15s;
+    border: 2px solid var(--gold);
+  }
+  .rbtn:hover { opacity:.83; transform:scale(1.04); }
+  .rbtn.primary { background:linear-gradient(90deg,var(--red),#5a1010); color:var(--gold); }
+  .rbtn.restart { background:linear-gradient(90deg,#1a3a6a,#0d1f3a); color:#a8c8f0; border-color:#6a9ad0; }
+
+  .breakdown { margin-top: 22px; text-align: left; }
+  .breakdown h3 { font-family:'Cinzel',serif; color:var(--red); font-size:1rem; margin-bottom:10px; text-align:center; }
+  .bd-row { display:flex; gap:8px; margin-bottom:6px; align-items:center; font-size:.88rem; color:#3a2000; }
+  .bd-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+  .bd-correct { background:var(--correct); }
+  .bd-wrong { background:var(--wrong); }
+
+  @media(max-width:500px){
+    .qtxt{font-size:.9rem;}
+    .obtn{font-size:.87rem; padding:8px 11px;}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>Test historyczny — VI klasa</h1>
-      <p>Tematy: kryzys i odbudowa państwa, Bolesław Śmiały, Kazimierz Odnowiciel, Bolesław Krzywousty, Pomorze, testament</p>
+
+<header>
+  <h1>⚔️ Quiz Historyczny – 120 Pytań ⚔️</h1>
+  <p>Polska Pierwszych Piastów · Rozdział VI · Klasa 6</p>
+</header>
+
+<div class="top-bar">
+  <div class="score-box"><span class="sn" id="cntC">0</span><span class="sl">POPRAWNE</span></div>
+  <div class="score-box"><span class="sn" id="cntW">0</span><span class="sl">BŁĘDNE</span></div>
+  <div class="score-box"><span class="sn" id="cntA">0</span><span class="sl">ODPOWIEDZIANO</span></div>
+  <div class="score-box"><span class="sn" id="cntR">120</span><span class="sl">POZOSTAŁO</span></div>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-label" id="progLbl">0 / 120 pytań</div>
+  <div class="prog-bg"><div class="prog-fill" id="progFill"></div></div>
+</div>
+
+<div class="quiz-container" id="quizContainer"></div>
+
+<div class="result-section" id="resultSection">
+  <div class="result-card">
+    <span class="crown">👑</span>
+    <h2>Koniec Quizu!</h2>
+    <span class="result-score" id="finalScore"></span>
+    <p class="result-msg" id="finalMsg"></p>
+    <div class="btn-row">
+      <button class="rbtn primary" id="dlBtn" onclick="downloadTxt()">💾 Pobierz wynik (.txt)</button>
+      <button class="rbtn restart" onclick="restartQuiz()">🔄 Spróbuj ponownie</button>
     </div>
-  </header>
-
-  <div class="card" id="quizCard">
-    <div class="qcount" id="qcount">Pytanie 1 z 60</div>
-    <div class="question" id="question">Ładowanie pytania...</div>
-
-    <div class="options" id="options"></div>
-
-    <div id="feedbackArea"></div>
-
-    <div class="controls">
-      <div style="flex:1">
-        <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="secondary" id="prevBtn" onclick="prevQ()" disabled>Poprzednie</button>
-        <button id="nextBtn" onclick="nextQ()">Następne</button>
-      </div>
-    </div>
+    <p style="color:#5a3a10;font-size:.82rem;margin:14px 0 6px;">📋 Wynik quizu (zaznacz i skopiuj lub pobierz przyciskiem powyżej):</p>
+    <textarea id="resultTxt" readonly
+      style="width:100%;height:260px;font-family:monospace;font-size:.78rem;
+             background:#fffdf5;border:2px solid #c9a96e;border-radius:8px;
+             padding:10px;color:#2a1a00;resize:vertical;"></textarea>
+    <div class="breakdown" id="breakdown"></div>
   </div>
-
-  <div class="card">
-    <strong>Instrukcja</strong>
-    <p style="margin:8px 0 0;color:var(--muted)">Odpowiedz na pytanie wybierając jedną z czterech odpowiedzi. Po kliknięciu zobaczysz od razu, czy odpowiedź jest poprawna. Możesz przejść do następnego pytania przyciskiem "Następne".</p>
-  </div>
-
-  <footer>Powodzenia — pracuj w swoim tempie.</footer>
 </div>
 
 <script>
-/* Dane pytań: 60 pytań dla ucznia klasy 6 — oparte na materiałach z podręcznika (tematy: XI–XII w., kryzys, odbudowa, Bolesławowie, Pomorze, testament) */
+/* ===================================================
+   120 PYTAŃ – cały materiał rozdziału VI
+   =================================================== */
 const questions = [
-  {q:"W którym wieku miał miejsce kryzys państwa polskiego opisany w materiałach?", 
-   opts:["IX wiek","XI wiek","XIII wiek","XV wiek"], a:1,
-   exp:"Kryzys pierwszych Piastów i jego odbudowa miały miejsce w pierwszej połowie XI wieku."},
-
-  {q:"Kto był królem lub księciem Polski, którego konflikt z biskupem Stanisławem doprowadził do jego upadku?", 
-   opts:["Mieszko I","Bolesław Śmiały","Kazimierz Odnowiciel","Bolesław Krzywousty"], a:1,
-   exp:"Bolesław II Śmiały stracił władzę po konflikcie z biskupem Stanisławem."},
-
-  {q:"Jak nazywa się książę, który przywrócił porządek i odbudował państwo po kryzysie XI wieku?", 
-   opts:["Mieszko II","Kazimierz Odnowiciel","Władysław Herman","Bolesław Chrobry"], a:1,
-   exp:"Kazimierz Odnowiciel odbudował państwo i przeniósł siedzibę władzy do Krakowa."},
-
-  {q:"Co to były insygnia królewskie wymienione w tekście?", 
-   opts:["korona, berło, jabłko","miecz, tarcza, hełm","korona, berło, jabłko królewskie","sztandar, korona, miecz"], a:2,
-   exp:"Insygnia królewskie to korona, berło i jabłko królewskie (orb)."}, 
-
-  {q:"W którym roku około powrócił do Polski Kazimierz Odnowiciel?", 
-   opts:["1017","1039","1106","1138"], a:1,
-   exp:"Kazimierz Odnowiciel powrócił do Polski około 1039 roku."},
-
-  {q:"Które wydarzenie było przyczyną kryzysu państwa w pierwszej połowie XI wieku?", 
-   opts:["najazdy i bunt ludności","epidemia","susza","brak następcy tronu"], a:0,
-   exp:"Przyczyną były najazdy (niemieckie, czeskie, ruskie) oraz bunt ludności."},
-
-  {q:"Jakie ziemie odzyskał Kazimierz Odnowiciel i uczynił ważnym ośrodkiem władzy?", 
-   opts:["Gniezno","Kraków","Poznań","Szczecin"], a:1,
-   exp:"Kazimierz przeniósł siedzibę władzy do Krakowa i odbudował państwo."},
-
-  {q:"Kto był następcą Bolesława Śmiałego według materiału?", 
-   opts:["Mieszko II","Władysław Herman","Kazimierz Odnowiciel","Bolesław Krzywousty"], a:1,
-   exp:"Następcą Bolesława Śmiałego był jego brat Władysław Herman."},
-
-  {q:"Jak nazywał się możny, który odgrywał dużą rolę za panowania Władysława Hermana?", 
-   opts:["Sieciech","Zbigniew","Mieszko","Rycheza"], a:0,
-   exp:"Sieciech był wpływowym możnym w państwie Władysława Hermana."},
-
-  {q:"Co zrobił Bolesław Krzywousty, aby przywrócić Polsce dostęp do morza?", 
-   opts:["podbił Pomorze Gdańskie i Zachodnie","kupił porty","zawarł pokój z Niemcami","zbudował flotę"], a:0,
-   exp:"Bolesław zdobył Pomorze Gdańskie i później Pomorze Zachodnie (m.in. Kołobrzeg)."}, 
-
-  {q:"W którym roku Bolesław Krzywousty zdobył Kołobrzeg i umocnił wpływy na Pomorzu Zachodnim?", 
-   opts:["1106","1122","1138","1079"], a:1,
-   exp:"Zdobycie Kołobrzegu i zakończenie walk na Pomorzu Zachodnim datuje się na 1122 rok."},
-
-  {q:"Co oznacza zasada senioratu w testamencie Bolesława Krzywoustego?", 
-   opts:["najstarszy syn ma władzę zwierzchnią","każdy syn rządził niezależnie","król wybierał następcę","władza przechodziła na szlachtę"], a:0,
-   exp:"Seniorat przewidywał, że najstarszy syn (senior) ma władzę zwierzchnią nad państwem."},
-
-  {q:"W którym roku zmarł Bolesław Krzywousty, co zapoczątkowało rozbicie dzielnicowe?", 
-   opts:["1106","1122","1138","1150"], a:2,
-   exp:"Bolesław Krzywousty zmarł w 1138 roku; wtedy wprowadzono podział kraju."},
-
-  {q:"Jakie było jedno z zagrożeń wynikających z podziału kraju między synów Bolesława?", 
-   opts:["wzmocnienie jedności państwa","bratobójcze wojny i osłabienie jedności","szybki rozwój gospodarczy","utrata religii"], a:1,
-   exp:"Podział prowadził do konfliktów między braćmi i osłabienia państwa."},
-
-  {q:"Kto opisał obronę Głogowa i okrutny podstęp Henryka V w kronice?", 
-   opts:["Gall Anonim","Wincenty Kadłubek","Jan Długosz","Gallus"], a:0,
-   exp:"Opis obrony Głogowa pochodzi z Kroniki polskiej autorstwa Galla Anonima."},
-
-  {q:"Jaką taktykę zastosowali Niemcy podczas oblężenia Głogowa według kronikarza?", 
-   opts:["przywiązali zakładników do machin oblężniczych","podpalili miasto","użyli trucizn","zawarli układ"], a:0,
-   exp:"Niemcy przywiązali zakładników (mieszkańców) do machin, by zmusić obrońców do kapitulacji."},
-
-  {q:"Jaki był skutek postawy mieszkańców Głogowa podczas oblężenia?", 
-   opts:["poddali się natychmiast","odparli atak i Niemcy odstąpili","miasto zostało zdobyte","mieszkańcy uciekli"], a:1,
-   exp:"Mieszkańcy bronili się mimo okrucieństwa, odparli atak i obrońcy odnieśli sukces."},
-
-  {q:"Które z poniższych wydarzeń miało miejsce w 1106 roku?", 
-   opts:["podbój Pomorza Gdańskiego przez Bolesława","Bolesław zdobył Kołobrzeg","Bolesław podbił Pomorze Gdańskie w 1106 roku","testament Bolesława"], a:2,
-   exp:"W 1106 roku Bolesław podbił i przyłączył Pomorze Gdańskie."},
-
-  {q:"Co powstało na Pomorzu Zachodnim po zwycięstwach Bolesława Krzywoustego?", 
-   opts:["nowa organizacja kościelna z biskupem w Wolinie","niezależne księstwo","państwo niemieckie","nic się nie zmieniło"], a:0,
-   exp:"Na Pomorzu Zachodnim powstała organizacja kościelna z biskupem w Wolinie."},
-
-  {q:"Jak nazywał się brat Bolesława Krzywoustego, z którym toczył walki o władzę?", 
-   opts:["Zbigniew","Mieszko","Kazimierz","Sieciech"], a:0,
-   exp:"Zbigniew był bratem Bolesława i uczestniczył w walkach o władzę."},
-
-  {q:"Co oznacza termin 'grod' używany w tekstach źródłowych?", 
-   opts:["rodzaj broni","warowny ośrodek, twierdza","świątynia","rodzinne imię"], a:1,
-   exp:"Grod to warowny ośrodek lub twierdza w średniowieczu."},
-
-  {q:"Które z poniższych miast było ważną twierdzą na Pomorzu Zachodnim zdobywaną przez Bolesława?", 
-   opts:["Gdańsk","Kołobrzeg","Kraków","Poznań"], a:1,
-   exp:"Kołobrzeg był główną twierdzą na Pomorzu Zachodnim zdobywaną w 1122 r."},
-
-  {q:"Jakie znaczenie miało odzyskanie dostępu do morza dla Polski w średniowieczu?", 
-   opts:["umożliwiło handel i kontakty morskie","nie miało znaczenia","spowodowało izolację","zwiększyło podatki"], a:0,
-   exp:"Dostęp do morza ułatwiał handel, kontakty międzynarodowe i rozwój portów."},
-
-  {q:"Kto był autorem Kroniki polskiej, która opisuje wydarzenia z czasów Bolesława Krzywoustego?", 
-   opts:["Gall Anonim","Jan Długosz","Wincenty Kadłubek","Gallus Anonim"], a:0,
-   exp:"Gall Anonim (znany też jako Gallus) jest autorem Kroniki polskiej."},
-
-  {q:"Co to jest testament Bolesława Krzywoustego w kontekście historii Polski?", 
-   opts:["dokument dzielący państwo między synów","umowa z Niemcami","kodeks prawny","list do papieża"], a:0,
-   exp:"Testament to dokument, w którym Bolesław podzielił kraj między synów i ustanowił seniorat."},
-
-  {q:"Które z poniższych było konsekwencją wprowadzenia zasady senioratu?", 
-   opts:["zapewnienie trwałego pokoju","częste spory o władzę między książętami","silne państwo centralne","utrata ziemi przez szlachtę"], a:1,
-   exp:"Zasada senioratu nie zapobiegła sporom; prowadziła do walk o władzę."},
-
-  {q:"Jak nazywał się władca, który w 1017 roku prowadził wyprawy przeciw Czechom i Niemcom?", 
-   opts:["Mieszko II","Bolesław Chrobry","Kazimierz Odnowiciel","Bolesław Śmiały"], a:0,
-   exp:"W 1017 roku Mieszko II prowadził wyprawy przeciw Czechom i Niemcom."},
-
-  {q:"Co oznacza termin 'lenno' w kontekście średniowiecznych stosunków politycznych?", 
-   opts:["ziemia oddana w zależność feudalną","rodzaj podatku","twierdza obronna","świątynia"], a:0,
-   exp:"Lenno to ziemia oddana w zależność feudalną innemu władcy."},
-
-  {q:"Które ziemie Kazimierz Odnowiciel oddał Czechom jako lenno?", 
-   opts:["Pomorze Gdańskie","Pomorze Zachodnie","Mazowsze","Pomorze Gdańskie jako lenno"], a:3,
-   exp:"Kazimierz oddał Pomorze Gdańskie Czechom jako lenno (w pewnym okresie)."}, 
-
-  {q:"Jakie były insygnia królewskie, które Mieszko II utracił w czasie kryzysu?", 
-   opts:["korona, berło, jabłko","miecz, tarcza, hełm","korona i miecz","berło i sztandar"], a:0,
-   exp:"Mieszko II utracił insygnia królewskie: korona, berło i jabłko."},
-
-  {q:"Co było jednym z efektów najazdów i buntów w 1038 roku?", 
-   opts:["wzmocnienie państwa","upadek Kościoła i państwa, utrata korony","pokój z Czechami","rozkwit handlu"], a:1,
-   exp:"Najazdy i bunt doprowadziły do upadku państwa i utraty korony."},
-
-  {q:"Jak nazywał się biskup, którego śmierć była przyczyną buntu przeciw Bolesławowi Śmiałemu?", 
-   opts:["Stanisław","Wojciech","Jakub","Mieszko"], a:0,
-   exp:"Biskup Stanisław został skazany na śmierć, co wywołało bunt przeciw królowi."},
-
-  {q:"Co oznacza termin 'grodzianie' użyty w kronice o obronie Głogowa?", 
-   opts:["mieszkańcy grodu","rycerze niemieccy","kupcy","księża"], a:0,
-   exp:"Grodzianie to mieszkańcy grodu (warownego ośrodka)."}, 
-
-  {q:"Które z poniższych wydarzeń miało miejsce po śmierci Władysława Hermana?", 
-   opts:["pokój między synami","wojna między jego synami","utrata Pomorza","przeniesienie stolicy do Gniezna"], a:1,
-   exp:"Po śmierci Władysława Hermana doszło do wojny między jego synami."},
-
-  {q:"Jak nazywał się możny, który został pokonany przez Zbigniewa i Bolesława Krzywoustego?", 
-   opts:["Sieciech","Rycheza","Mieszko","Kazimierz"], a:0,
-   exp:"Sieciech został pokonany przez Zbigniewa i Bolesława Krzywoustego."},
-
-  {q:"Które z poniższych miast stało się ważnym ośrodkiem władzy za Kazimierza Odnowiciela?", 
-   opts:["Gniezno","Kraków","Poznań","Sandomierz"], a:1,
-   exp:"Kraków stał się główną siedzibą władzy za Kazimierza Odnowiciela."},
-
-  {q:"Co było jednym z zadań ucznia w sekcji 'Praca z mapą' w podręczniku?", 
-   opts:["wskazać dzielnice i grody","narysować port","napisać wiersz","przetłumaczyć tekst"], a:0,
-   exp:"Zadanie polegało na wskazaniu dzielnic i grodów na mapie."},
-
-  {q:"Który z władców przyłączył Pomorze Gdańskie do Polski?", 
-   opts:["Mieszko II","Bolesław Krzywousty","Kazimierz Odnowiciel","Bolesław Śmiały"], a:1,
-   exp:"Bolesław Krzywousty przyłączył Pomorze Gdańskie (około 1106)."}, 
-
-  {q:"Jakie były główne skutki rozbicia dzielnicowego zapoczątkowanego po 1138 roku?", 
-   opts:["wzmocnienie państwa","osłabienie jedności i częste konflikty","szybki rozwój handlu","utrata języka"], a:1,
-   exp:"Rozbicie dzielnicowe osłabiło jedność państwa i prowadziło do konfliktów."},
-
-  {q:"Co oznacza termin 'senior' w systemie senioratu?", 
-   opts:["najmłodszy książę","najstarszy książę z władzami zwierzchnimi","biskup","król obcy"], a:1,
-   exp:"Senior to najstarszy książę, który miał władzę zwierzchnią."},
-
-  {q:"Które z poniższych wydarzeń miało miejsce w 1122 roku?", 
-   opts:["zdobycie Kołobrzegu","testament Bolesława","śmierć Kazimierza","koronacja Mieszka II"], a:0,
-   exp:"W 1122 roku zakończyły się walki na Pomorzu Zachodnim zdobyciem Kołobrzegu."},
-
-  {q:"Jakie znaczenie miała organizacja kościelna na Pomorzu Zachodnim po zdobyciu tych ziem?", 
-   opts:["ułatwiała chrystianizację i administrację","była bez znaczenia","zniszczyła miejscowe zwyczaje","spowodowała bunt"], a:0,
-   exp:"Organizacja kościelna wspierała chrystianizację i porządek administracyjny."},
-
-  {q:"Kto był autorem kroniki, która opisała okrucieństwo Henryka V przy oblężeniu Głogowa?", 
-   opts:["Gall Anonim","Jan Długosz","Wincenty Kadłubek","Gallus"], a:0,
-   exp:"Gall Anonim opisał oblężenie Głogowa i podstęp Henryka V."},
-
-  {q:"Jakie były reakcje mieszkańców Głogowa na widok przywiązanych zakładników według kroniki?", 
-   opts:["płakali, modlili się, chwycili za broń","uciekli","poddali się","zawarli pokój"], a:0,
-   exp:"Mieszkańcy reagowali płaczem, modlitwą i chwyceniem za broń, a mimo to bronili grodu."},
-
-  {q:"Który z władców był znany jako 'Odnowiciel'?", 
-   opts:["Bolesław Krzywousty","Kazimierz Odnowiciel","Mieszko II","Władysław Herman"], a:1,
-   exp:"Kazimierz Odnowiciel otrzymał ten przydomek za odbudowę państwa i Kościoła."},
-
-  {q:"Co było jednym z zadań ucznia w sekcji 'Sprawdź się' w podręczniku?", 
-   opts:["wyjaśnić przyczyny kryzysu, opisać postawy, wymienić grody","narysować portret króla","przetłumaczyć tekst na łacinę","napisać opowiadanie"], a:0,
-   exp:"Zadania polegały na analizie przyczyn kryzysu, opisie postaw i wskazaniu grodów."},
-
-  {q:"Jakie terytoria są wymieniane jako sąsiedzi Polski na mapach z XI–XII wieku?", 
-   opts:["Królestwo Węgierskie i Księstwo Kijowskie","Hiszpania i Portugalia","Anglia i Francja","Szwecja i Norwegia"], a:0,
-   exp:"Na mapach sąsiednimi państwami były m.in. Królestwo Węgierskie i Księstwo Kijowskie."},
-
-  {q:"Co oznacza termin 'grodzisko' w kontekście średniowiecznej topografii?", 
-   opts:["miejsce po dawnym grodzie","rodzaj broni","świątynia","rzeka"], a:0,
-   exp:"Grodzisko to pozostałość po dawnym grodzie (kopiec, wał)."}, 
-
-  {q:"Który z władców był ojcem Bolesława Krzywoustego?", 
-   opts:["Władysław Herman","Mieszko II","Kazimierz Odnowiciel","Bolesław Chrobry"], a:0,
-   exp:"Władysław Herman był ojcem Bolesława Krzywoustego."},
-
-  {q:"Jakie były główne zadania seniora według testamentu?", 
-   opts:["reprezentowanie państwa i utrzymanie jedności","pobieranie podatków tylko","dowodzenie flotą","bycie biskupem"], a:0,
-   exp:"Senior miał reprezentować państwo i pełnić funkcję zwierzchnią nad innymi książętami."},
-
-  {q:"Co było jednym z powodów, dla których Bolesław Krzywousty prowadził wyprawy na Pomorze?", 
-   opts:["chęć rozszerzenia wpływów i chrystianizacji","poszukiwanie złota","ucieczka przed wrogiem","zmiana stolicy"], a:0,
-   exp:"Celem było rozszerzenie wpływów, przyłączenie ziem i szerzenie chrześcijaństwa."},
-
-  {q:"Jak nazywa się dokument, w którym Bolesław Krzywousty podzielił państwo między synów?", 
-   opts:["testament","konstytucja","traktat","dekret"], a:0,
-   exp:"To dokument nazywany testamentem Bolesława Krzywoustego."},
-
-  {q:"Które z poniższych stwierdzeń o Mieszku II jest prawdziwe?", 
-   opts:["był młodszym synem Bolesława Chrobrego i panował w XI w.","był królem w XIII w.","był papieżem","był władcą w XVI w."], a:0,
-   exp:"Mieszko II był młodszym synem Bolesława Chrobrego i panował w XI wieku."},
-
-  {q:"Co oznacza termin 'rozbicie dzielnicowe' w historii Polski?", 
-   opts:["podział państwa na dzielnice rządzone przez synów","zjednoczenie kraju","utrata języka","zmiana religii"], a:0,
-   exp:"Rozbicie dzielnicowe to podział państwa na dzielnice rządzone przez potomków władcy."},
-
-  {q:"Które z poniższych było jednym z efektów polityki Bolesława Krzywoustego?", 
-   opts:["wzmocnienie pozycji Polski w regionie","izolacja kraju","utrata wszystkich ziem","przeniesienie stolicy do Gdańska"], a:0,
-   exp:"Bolesław wzmocnił pozycję Polski w Europie Środkowej i przyłączył Pomorze."},
-
-  {q:"Jak nazywała się główna twierdza Pomorza Zachodniego zdobyta przez Bolesława?", 
-   opts:["Wolin","Kołobrzeg","Gdańsk","Szczecin"], a:1,
-   exp:"Kołobrzeg był główną twierdzą Pomorza Zachodniego zdobywaną w 1122 r."},
-
-  {q:"Które z poniższych określeń najlepiej pasuje do Galla Anonima?", 
-   opts:["kronikarz średniowieczny","król","biskup","kupiec"], a:0,
-   exp:"Gall Anonim był kronikarzem, autorem Kroniki polskiej."},
-
-  {q:"Co było jednym z zadań obrońców Głogowa według kroniki?", 
-   opts:["bronić grodu mimo obecności zakładników","poddać się natychmiast","uciec do lasu","zawrzeć sojusz"], a:0,
-   exp:"Obrońcy bronili grodu mimo że zakładnicy byli przywiązani do machin."},
-
-  {q:"Które z poniższych wydarzeń przyczyniło się do upadku Bolesława Śmiałego?", 
-   opts:["skazanie biskupa Stanisława na śmierć i bunt","zwycięstwo nad Niemcami","pokój z Czechami","podbój Pomorza"], a:0,
-   exp:"Skazanie biskupa i wynikający z tego bunt doprowadziły do utraty władzy przez Bolesława."},
-
-  {q:"Jakie były główne elementy uzbrojenia wymienione w tekście o obronie Głogowa?", 
-   opts:["machiny oblężnicze, broń obrońców, konie","działo, karabiny, samoloty","łuki, proce, armaty","pancerze, działa, karabiny"], a:0,
-   exp:"Kronikarz wspominał o machinach oblężniczych, broni obrońców i koniach."},
-
-  {q:"Co oznacza termin 'praca z tekstem źródłowym' w podręczniku?", 
-   opts:["analiza fragmentu kroniki lub dokumentu","pisanie opowiadania","rysowanie mapy","śpiewanie pieśni"], a:0,
-   exp:"Praca z tekstem źródłowym polega na analizie fragmentu kroniki lub innego dokumentu."},
-
-  {q:"Które z poniższych było celem miniprojektu wymienionego w podręczniku?", 
-   opts:["przedstawienie na mapie dzielnic po śmierci Bolesława i wnioski","narysowanie portu","przetłumaczenie kroniki","zbudowanie modelu grodu"], a:0,
-   exp:"Miniprojekt polegał na przedstawieniu dzielnic na mapie i zapisaniu wniosków."},
-
-  {q:"Jakie były główne regiony, które Kazimierz Odnowiciel odzyskał lub umocnił?", 
-   opts:["Śląsk, Małopolska, Mazowsze","Pomorze Zachodnie, Pomorze Gdańskie","Wielkopolska tylko","Mazowsze tylko"], a:0,
-   exp:"Kazimierz odzyskał Śląsk, Małopolskę i przyłączył Mazowsze."},
-
-  {q:"Co oznacza termin 'bunt ludności' w kontekście kryzysu XI wieku?", 
-   opts:["sprzeciw ludności wobec władzy książęcej i chrześcijaństwa","pokój społeczny","wzrost handlu","nowe prawa"], a:0,
-   exp:"Bunt ludności to sprzeciw przeciwko władzy książęcej i narzuconej religii."},
-
-  {q:"Które z poniższych stwierdzeń o Władysławie Hermanie jest prawdziwe?", 
-   opts:["był ojcem Bolesława Krzywoustego i panował w Polsce","był królem Anglii","był papieżem","był władcą w XVI wieku"], a:0,
-   exp:"Władysław Herman był ojcem Bolesława Krzywoustego i panował w Polsce."},
-
-  {q:"Jakie znaczenie miała obrona Głogowa dla pamięci historycznej Polski?", 
-   opts:["pokazuje odwagę obrońców i opór wobec agresora","nie ma znaczenia","była porażką","doprowadziła do utraty ziem"], a:0,
-   exp:"Obrona Głogowa jest symbolem odwagi i oporu wobec agresji."},
-
-  {q:"Które z poniższych było jednym z efektów polityki Bolesława Krzywoustego wobec Pomorza?", 
-   opts:["rozszerzenie wpływów Polski i chrystianizacja terenów","utrata wpływów","izolacja kraju","utrata religii"], a:0,
-   exp:"Polityka Bolesława doprowadziła do przyłączenia Pomorza i rozwoju kościoła."},
-
-  {q:"Jakie zadanie miał senior według zasady senioratu poza reprezentacją państwa?", 
-   opts:["utrzymanie porządku i zwierzchnia władza nad książętami","bycie jedynie symbolem","prowadzenie handlu","bycie biskupem"], a:0,
-   exp:"Senior miał utrzymywać porządek i pełnić władzę zwierzchnią nad książętami."},
-
-  {q:"Które z poniższych wydarzeń nastąpiło najpóźniej chronologicznie?", 
-   opts:["powrót Kazimierza około 1039","podbój Pomorza Gdańskiego 1106","zdobycie Kołobrzegu 1122","śmierć Bolesława Krzywoustego 1138"], a:3,
-   exp:"Śmierć Bolesława w 1138 roku jest najpóźniejszym z wymienionych wydarzeń."}
+
+/* ── MIESZKO II ── */
+{q:"Kto został królem Polski po śmierci Bolesława Chrobrego w 1025 roku?",
+ o:["Zbigniew","Mieszko II","Bezprym","Kazimierz Odnowiciel"], a:1},
+
+{q:"Jak nazywała się żona Mieszka II?",
+ o:["Dobronega","Rycheza","Adelajda","Świętosława"], a:1},
+
+{q:"Czyją siostrzenicą była Rycheza, żona Mieszka II?",
+ o:["Cesarza Henryka V","Cesarza Ottona III","Króla Czech","Papieża Sylwestra II"], a:1},
+
+{q:"Z jakich języków był znany Mieszko II?",
+ o:["Polskiego i węgierskiego","Arabskiego i hebrajskiego","Greckiego i łacińskiego","Czeskiego i rosyjskiego"], a:2},
+
+{q:"W którym roku Polska utraciła Milsko, Łużyce i Grody Czerwieńskie?",
+ o:["W 1025 r.","W 1031 r.","W 1034 r.","W 1038 r."], a:1},
+
+{q:"Kto był starszym bratem Mieszka II, który wykorzystał trudną sytuację kraju?",
+ o:["Zbigniew","Sieciech","Bezprym","Kazimierz"], a:2},
+
+{q:"Co Bezprym odesłał cesarzowi?",
+ o:["Miecz koronacyjny","Insygnia królewskie – koronę, berło i jabłko","Złote monety","Relikwie świętego Wojciecha"], a:1},
+
+{q:"Co to są insygnia królewskie?",
+ o:["Dokumenty królewskie","Pieczęć i tarcza króla","Korona, berło oraz jabłko królewskie","Zbroja i miecz władcy"], a:2},
+
+{q:"Kiedy zmarł Mieszko II?",
+ o:["W 1025 r.","W 1031 r.","W 1034 r.","W 1038 r."], a:2},
+
+{q:"Co wydarzyło się w Polsce bezpośrednio po śmierci Mieszka II?",
+ o:["Nastąpił rozkwit państwa i Kościoła","Polska podbiła Czechy","Wybuchł bunt możnych i ludności chcącej wrócić do pogaństwa","Nawiązano pokój z cesarstwem"], a:2},
+
+/* ── KRYZYS – CZESI, KAZIMIERZ ── */
+{q:"W którym roku Czesi spustoszyli Wielkopolskę?",
+ o:["W 1025 r.","W 1031 r.","W 1034 r.","W 1038 r."], a:3},
+
+{q:"Co Czesi wywieźli z Gniezna podczas najazdu w 1038 roku?",
+ o:["Koronę polską","Złoto królewskie","Relikwie świętego Wojciecha","Kroniki polskie"], a:2},
+
+{q:"Jakie polskie miasta Czesi doszczętnie zniszczyli w 1038 roku?",
+ o:["Kraków i Wrocław","Poznań i Gniezno","Gdańsk i Szczecin","Wrocław i Sandomierz"], a:1},
+
+{q:"Co Czesi przyłączyli do swojego państwa podczas kryzysu?",
+ o:["Mazowsze","Kujawy","Śląsk","Małopolskę"], a:2},
+
+{q:"Dokąd uciekł książę Kazimierz, syn Mieszka II?",
+ o:["Na Węgry","Do Francji","Do Niemiec","Na Ruś"], a:2},
+
+{q:"Od kogo Kazimierz Odnowiciel uzyskał pomoc zbrojną do powrotu?",
+ o:["Od króla Węgier","Od cesarza","Od papieża","Od króla Francji"], a:1},
+
+{q:"Z ilu ciężkozbrojnych wojów składała się najprawdopodobniej armia Kazimierza wracającego do Polski?",
+ o:["Około 200","Około 500","Około 1000","Około 2000"], a:1},
+
+{q:"Które miasto stało się główną siedzibą władcy zamiast zniszczonego Gniezna?",
+ o:["Wrocław","Poznań","Kraków","Sandomierz"], a:2},
+
+{q:"Dlaczego Kazimierz otrzymał przydomek Odnowiciel?",
+ o:["Bo uzyskał koronę królewską","Bo odbudował państwo polskie i przywrócił chrześcijaństwo","Bo pokonał Czechów w wielkiej bitwie","Bo zbudował setki kościołów"], a:1},
+
+{q:"Jakie ziemie weszły w skład państwa Kazimierza Odnowiciela?",
+ o:["Śląsk, Mazowsze, Kujawy, Pomorze Wschodnie","Wielkopolska, Małopolska, Mazowsze i Śląsk","Tylko Wielkopolska i Małopolska","Polska, Czechy i Węgry"], a:1},
+
+{q:"Co Kazimierz Odnowiciel odebrał Czechom?",
+ o:["Gniezno","Kraków","Śląsk","Gdańsk"], a:2},
+
+{q:"Jak Kazimierz Odnowiciel wzmacniał chrześcijaństwo w kraju?",
+ o:["Sprowadził krzyżowców","Odbudował polskie biskupstwa i kazał wznosić nowe kościoły","Wysłał misjonarzy do Prus","Przekazał władzę nad Kościołem cesarzowi"], a:1},
+
+{q:"Kiedy żył Kazimierz Odnowiciel?",
+ o:["*990 †1034","*1016 †1058","*1042 †1082","*1043 †1102"], a:1},
+
+{q:"Z kim Kazimierz Odnowiciel zawarł sojusz, poślubiając Dobronegę?",
+ o:["Z królem Czech","Z cesarzem","Z władcami Rusi","Z papieżem"], a:2},
+
+/* ── PRZYCZYNY I SKUTKI KRYZYSU XI WIEKU ── */
+{q:"Która z poniższych pozycji NIE była przyczyną kryzysu Królestwa Polskiego na początku XI wieku?",
+ o:["Najazd niemiecki i ruski w 1031 r.","Bunt ludności odrzucającej chrześcijaństwo","Najazd czeski na Wielkopolskę w 1038 r.","Koronacja Bolesława Śmiałego w 1076 r."], a:3},
+
+{q:"Który z poniższych punktów NIE był skutkiem kryzysu Królestwa Polskiego na początku XI wieku?",
+ o:["Utrata korony przez władców Polski","Spadek znaczenia Polski w Europie","Utrata części terytorium państwa","Zdobycie Pomorza Zachodniego"], a:3},
+
+{q:"Co oznaczało oderwanie się Mazowsza od Polski podczas kryzysu XI wieku?",
+ o:["Mazowsze stało się częścią Czech","Mazowsze stało się niezależną krainą, odłączoną od państwa polskiego","Mazowsze zajęła Ruś","Mazowsze przyłączono do cesarstwa"], a:1},
+
+/* ── BOLESŁAW ŚMIAŁY ── */
+{q:"Kto objął władzę w Polsce po śmierci Kazimierza Odnowiciela?",
+ o:["Władysław Herman","Zbigniew","Bolesław Śmiały","Bolesław Krzywousty"], a:2},
+
+{q:"W którym roku Bolesław Śmiały został koronowany na króla Polski?",
+ o:["W 1063 r.","W 1071 r.","W 1076 r.","W 1079 r."], a:2},
+
+{q:"W jakim sporze wsparł Bolesław Śmiały papieża Grzegorza VII?",
+ o:["W sporze o relikwie świętego Wojciecha","W sporze o inwestyturę z cesarzem Henrykiem IV","W wojnie z Czechami","W sporze o koronę polską"], a:1},
+
+{q:"Co pomogło Bolesławowi Śmiałemu przywrócić arcybiskupstwo w Gnieźnie?",
+ o:["Zwycięstwo militarne nad cesarzem","Poparcie papieża Grzegorza VII","Sojusz z Rusią","Ślub z córką cesarza"], a:1},
+
+{q:"Jakie terytoria odzyskał Bolesław Śmiały od Rusi?",
+ o:["Milsko i Łużyce","Śląsk","Grody Czerwieńskie","Pomorze Gdańskie"], a:2},
+
+{q:"Kto stał na czele buntu możnych przeciwko Bolesławowi Śmiałemu?",
+ o:["Palatyn Sieciech","Zbigniew","Biskup krakowski Stanisław","Władysław Herman"], a:2},
+
+{q:"Co spotkało biskupa Stanisława z wyroku Bolesława Śmiałego?",
+ o:["Został wygnany z kraju","Skazano go na śmierć","Został uwięziony","Pozbawiono go biskupstwa"], a:1},
+
+{q:"W którym roku Bolesław Śmiały musiał uciec z kraju?",
+ o:["W 1063 r.","W 1076 r.","W 1079 r.","W 1082 r."], a:2},
+
+{q:"Dokąd uciekł Bolesław Śmiały?",
+ o:["Na Ruś","Do Niemiec","Na Węgry","Do Czech"], a:2},
+
+{q:"Jak jeszcze inaczej nazywany był Bolesław Śmiały?",
+ o:["Bolesław Wielki","Bolesław Szczodry","Bolesław Chrobry","Bolesław Pobożny"], a:1},
+
+{q:"W jakim wieku żył Bolesław Śmiały?",
+ o:["*990 †1034","*1016 †1058","*1042 †1082","*1043 †1102"], a:2},
+
+/* ── BISKUP STANISŁAW ── */
+{q:"W którym roku urodził się Stanisław, późniejszy biskup krakowski?",
+ o:["W 1000 r.","W 1030 r.","W 1050 r.","W 1071 r."], a:1},
+
+{q:"Kiedy Stanisław został biskupem krakowskim?",
+ o:["W 1050 r.","W 1063 r.","W 1071 r.","W 1076 r."], a:2},
+
+{q:"Jaki rodzaj śmierci przypisywali Stanisławowi kronikarze?",
+ o:["Śmierć przez powieszenie","Śmierć przez odcięcie rąk, nóg, nosa i uszu","Śmierć przez ścięcie głowy","Śmierć przez utopienie"], a:1},
+
+{q:"W którym roku papież ogłosił Stanisława świętym (kanonizacja)?",
+ o:["W 1138 r.","W 1200 r.","W 1253 r.","W 1300 r."], a:2},
+
+{q:"Jaki cudowny znak miał świadczyć o świętości Stanisława?",
+ o:["Uzdrowienie chorych przy jego grobie","Pośmiertne złączenie się rozciętych części jego ciała","Pojawienie się jego ducha w Krakowie","Cudowne ocalenie Gniezna"], a:1},
+
+{q:"Z jaką ideą polityczną wiązano kult świętego Stanisława?",
+ o:["Że Polska podejmie nową wyprawę krzyżową","Że polskie ziemie w cudowny sposób zjednoczą się jak ciało biskupa","Że Polska odzyska Grody Czerwieńskie","Że Polska zostanie królestwem dziedzicznym"], a:1},
+
+{q:"Co wykazały badania przeprowadzone w latach 60. XX w. na szczątkach Stanisława?",
+ o:["Że rzeczywiście był rozczłonkowany","Że zginął od uderzenia w tył czaszki, nie od rozczłonkowania","Że przeżył zamach","Że był otruty"], a:1},
+
+{q:"Gdzie znajduje się relikwiarz ze szczątkami biskupa Stanisława?",
+ o:["W bazylice w Gnieźnie","W katedrze wawelskiej w Krakowie","W kościele w Sandomierzu","W kaplicy zamku w Poznaniu"], a:1},
+
+{q:"Jak potocznie nazywa się bazylika pod wezwaniem świętego Stanisława, znajdująca się niedaleko Wawelu?",
+ o:["Skałką lub kościołem Na Skałce","Kościołem Mariackim","Kościołem Świętego Krzyża","Farą krakowską"], a:0},
+
+/* ── WŁADYSŁAW HERMAN ── */
+{q:"Kto przejął władzę w Polsce po ucieczce Bolesława Śmiałego?",
+ o:["Bolesław Krzywousty","Zbigniew","Władysław Herman","Sieciech"], a:2},
+
+{q:"Jakim tytułem zadowolił się Władysław Herman?",
+ o:["Króla","Cesarza","Księcia","Palatyna"], a:2},
+
+{q:"Kiedy żył Władysław Herman?",
+ o:["*990 †1034","*1016 †1058","*1042 †1082","*ok. 1043 †1102"], a:3},
+
+{q:"Ile razy był żonaty Władysław Herman?",
+ o:["Raz","Dwa razy","Trzy razy","Cztery razy"], a:1},
+
+{q:"Dlaczego małżeństwa Władysława Hermana miały znaczenie polityczne?",
+ o:["Przynosiły mu dochody","Miały zapewnić Polsce dobre stosunki z silnymi sąsiadami (Czechy, Niemcy)","Dawały mu prawo do tytułu królewskiego","Pozwoliły odzyskać Śląsk"], a:1},
+
+{q:"Co to był palatyn w średniowiecznej Polsce?",
+ o:["Najwyższy kapłan","Najwyższy urzędnik państwowy zastępujący władcę w sprawach sądownictwa i wojskowości","Wódz wojska","Zarządca skarbca królewskiego"], a:1},
+
+{q:"Jak nazywał się palatyn Władysława Hermana?",
+ o:["Zbigniew","Sieciech","Bolesław","Miecław"], a:1},
+
+{q:"Co Sieciech zrobił ze swoją pozycją palatyna?",
+ o:["Pomógł Polsce odeprzeć Niemców","Przejął faktyczną rolę władcy, wykorzystując nieudolność Hermana","Odbudował arcybiskupstwo gnieźnieńskie","Przyłączył Śląsk do Polski"], a:1},
+
+{q:"Kim byli Zbigniew i Bolesław Krzywousty względem siebie?",
+ o:["Rodzonymi braćmi","Przyrodnimi braćmi (wspólny ojciec, różne matki)","Kuzynami","Stryjem i bratankiem"], a:1},
+
+{q:"Co zrobili Zbigniew i Bolesław Krzywousty z Sieciecha?",
+ o:["Zamordowali go","Pokonali jego wojska i wygnali go z kraju","Sprzymierzyli się z nim","Oddali go cesarzowi"], a:1},
+
+{q:"Co Zbigniew dostał po przymusowym podziale Polski przez Władysława Hermana?",
+ o:["Małopolskę i Śląsk","Wielkopolskę i Kujawy","Mazowsze","Pomorze Gdańskie"], a:1},
+
+{q:"Co Bolesław Krzywousty dostał po podziale Polski przez Władysława Hermana?",
+ o:["Wielkopolskę i Kujawy","Mazowsze i Kujawy","Małopolskę i Śląsk","Pomorze Zachodnie"], a:2},
+
+{q:"Co zachował dla siebie Władysław Herman po podziale kraju?",
+ o:["Wielkopolskę","Małopolskę","Mazowsze","Śląsk"], a:2},
+
+/* ── BRATOBÓJCZA WOJNA ── */
+{q:"Kiedy zmarł Władysław Herman?",
+ o:["W 1092 r.","W 1102 r.","W 1109 r.","W 1111 r."], a:1},
+
+{q:"Ile lat trwały walki między Bolesławem Krzywoustym a Zbigniewem o całe państwo?",
+ o:["Dwa lata","Cztery lata","Sześć lat","Osiem lat"], a:1},
+
+{q:"Co Bolesław Krzywousty zmusił Zbigniewa zrobić po czterech latach wojny?",
+ o:["Przyjąć chrzest ponownie","Opuścić kraj","Zrzec się praw do Śląska","Oddać Mazowsze"], a:1},
+
+{q:"Kto najechał Polskę w 1109 roku, chcąc pomóc Zbigniewowi?",
+ o:["Czesi z królem Władysławem","Niemcy i Czesi pod dowództwem Henryka V","Rusini z Kijowa","Prusowie"], a:1},
+
+{q:"Które grody polskie bohatersko obroniły się przed Henrykiem V w 1109 roku?",
+ o:["Kraków, Gniezno i Poznań","Głogów, Wrocław i Bytom","Szczecin, Kołobrzeg i Gdańsk","Sandomierz, Lublin i Płock"], a:1},
+
+{q:"Kiedy zawarto porozumienie między Bolesławem Krzywoustym a Zbigniewem?",
+ o:["W 1102 r.","W 1109 r.","W 1111 r.","W 1116 r."], a:2},
+
+{q:"Co Bolesław Krzywousty nakazał zrobić Zbigniewowi po jego powrocie do kraju?",
+ o:["Wygnał go ponownie","Kazał go pojmać i oślepić","Zamknął go w klasztorze","Oddał go w ręce cesarza"], a:1},
+
+{q:"Co oznaczało oślepienie Zbigniewa w kontekście władzy?",
+ o:["Zbigniew mógł dalej rządzić, ale nie walczyć","Oślepiony nie mógł ubiegać się o władzę – Krzywousty stał się jedynym władcą","Zbigniew uciekł do Niemiec","Zbigniew wrócił do klasztoru"], a:1},
+
+/* ── OBRONA GŁOGOWA ── */
+{q:"Kto opisał obronę Głogowa w Kronice polskiej?",
+ o:["Wincenty Kadłubek","Jan Długosz","Gall Anonim","Bolesław Krzywousty"], a:2},
+
+{q:"Jak po łacinie lub w skrócie bywa nazywany kronikarz opisujący obronę Głogowa?",
+ o:["Mistrz Wincenty","Gall Anonim (Anonim tzw. Gall)","Jan z Czarnkowa","Kronikarz Gniezneński"], a:1},
+
+{q:"Jakiego podstępu użył cesarz Henryk V podczas oblężenia Głogowa?",
+ o:["Podpalił miasto od tyłu","Przywiązał pojmanych mieszkańców do machin oblężniczych, by złamać wolę obrońców","Zatruł wodę w studniach","Wybudował tunel pod murami"], a:1},
+
+{q:"Jak zachowali się mieszkańcy Głogowa wobec zakładników przywiązanych do machin?",
+ o:["Poddali gród, by ocalić swoich","Zaczęli rokowania z cesarzem","Nie oszczędzali własnych – bronili grodu kamieniami i orężem","Uciekli przez tylną bramę"], a:2},
+
+{q:"Jakie elementy uzbrojenia wymienia kronikarz podczas szturmu na Głogów?",
+ o:["Tylko łuki i strzały","Maczugi i topory","Machiny miotające głazy, kusze, pociski i strzały","Armaty i muszkiety"], a:2},
+
+{q:"Jak kronikarz opisuje zakończenie szturmu na Głogów?",
+ o:["Niemcy zdobyli gród i wymordowali mieszkańców","Cesarz zawarł pokój z Krzywoustym","Niemcy zostali odparci – Polska obroniła gród","Zbigniew wrócił z pomocą dla cesarza"], a:2},
+
+/* ── PODBÓJ POMORZA ── */
+{q:"Jakie terytoria Bolesław Krzywousty chciał odzyskać dla Polski?",
+ o:["Milsko i Łużyce","Grody Czerwieńskie","Pomorze Gdańskie i Zachodnie","Mazowsze i Kujawy"], a:2},
+
+{q:"Dlaczego Pomorze Gdańskie i Zachodnie były ważne dla Polski?",
+ o:["Ze względu na złoża złota i srebra","Oderwały się od Polski w czasach wcześniejszych władców i stanowiły niezależne księstwa","Zamieszkiwała je polska szlachta","Były siedzibą arcybiskupstwa"], a:1},
+
+{q:"W którym roku Bolesław Krzywousty przyłączył Pomorze Gdańskie do swojego państwa?",
+ o:["W 1109 r.","W 1111 r.","Około 1116 r.","W 1122 r."], a:2},
+
+{q:"W którym roku Bolesław Krzywousty podporządkował sobie Pomorze Zachodnie?",
+ o:["W 1116 r.","W 1119 r.","W 1122 r.","W 1138 r."], a:2},
+
+{q:"Które grody zdobycie zadecydowało o podporządkowaniu Pomorza Zachodniego?",
+ o:["Gdańsk i Słupsk","Kołobrzeg i Szczecin","Wolin i Kamień","Stargard i Białogard"], a:1},
+
+{q:"Co Bolesław Krzywousty zorganizował, by chrystianizować ludy Pomorza?",
+ o:["Wojnę krzyżową","Dwie kolejne misje chrystianizacyjne","Budowę klasztorów","Translację relikwii świętego Wojciecha"], a:1},
+
+{q:"Jaka religia dominowała wśród możnowładców i ludności Pomorza na początku XII wieku?",
+ o:["Chrześcijaństwo","Islam","Pogaństwo","Judaizm"], a:2},
+
+/* ── POLSKA BOLESŁAWA KRZYWOUSTEGO – MAPA ── */
+{q:"Jak na mapie oznaczono ziemie zdobyte i przyłączone do Polski przez Bolesława Krzywoustego?",
+ o:["Jasnoczerwonym (różowym) kolorem","Ciemnoczerwonym (bordo) kolorem","Szrafurą (ukośnymi kreskami)","Niebieskim kolorem"], a:0},
+
+{q:"Które państwo graniczyło z Polską Krzywoustego od południa?",
+ o:["Królestwo Szwecji","Królestwo Czeskie i Królestwo Węgierskie","Księstwo Kijowskie","Marchia Brandenburska"], a:1},
+
+{q:"Jaki lud zamieszkiwał tereny na północny wschód od Polski Krzywoustego?",
+ o:["Wieleci","Prusowie","Jaćwingowie","Mazurowie"], a:1},
+
+{q:"Które miasto było siedzibą arcybiskupstwa (najważniejszego centrum kościelnego) w Polsce Pierwszych Piastów?",
+ o:["Kraków","Wrocław","Gniezno","Poznań"], a:2},
+
+{q:"Jaka granica zaznaczona jest niebieską linią na mapie Polski z 1138 roku?",
+ o:["Granica Polski","Granica cesarstwa","Granica Rusi","Granica Prus"], a:1},
+
+/* ── TESTAMENT BOLESŁAWA KRZYWOUSTEGO ── */
+{q:"Czego obawiał się Bolesław Krzywousty po swojej śmierci?",
+ o:["Najazdu Niemców","Kolejnej bratobójczej wojny domowej między synami","Utraty Pomorza","Buntu możnych"], a:1},
+
+{q:"Co to jest testament?",
+ o:["Zapis praw państwowych","Dokument, w którym osoba rozporządza swoim majątkiem na wypadek śmierci","Kronika opisująca czyny władcy","Umowa między władcą a papieżem"], a:1},
+
+{q:"Jak inaczej nazywano testament Bolesława Krzywoustego?",
+ o:["Konstytucją krakowską","Statutem Bolesława Krzywoustego","Prawem dziedziczenia","Bullą złotą"], a:1},
+
+{q:"Co to jest zasada senioratu?",
+ o:["Najstarszy z rodu Piastów sprawuje władzę zwierzchnią nad pozostałymi","Władza przekazywana jest zawsze córce władcy","Podział kraju między wszystkich synów po równo","Władca mianuje następcę wedle własnej woli"], a:0},
+
+{q:"Jak nazywano najstarszego księcia sprawującego władzę zwierzchnią?",
+ o:["Juniorem","Seniorem","Palatynem","Kasztelanem"], a:1},
+
+{q:"Jak nazywano pozostałych braci podlegających seniorowi?",
+ o:["Palatynami","Kasztelanami","Juniorami","Biskupami"], a:2},
+
+{q:"Które trzy uprawnienia miał senior według testamentu?",
+ o:["Zbieranie podatków, mianowanie biskupów i bicie monet","Wypowiadanie wojny, reprezentowanie państwa za granicą i bicie własnej monety","Tylko zbieranie podatków","Dowodzenie wojskiem i nadawanie ziem"], a:1},
+
+{q:"Kiedy testament Bolesława Krzywoustego zaczął obowiązywać?",
+ o:["W 1116 r.","W 1122 r.","W 1138 r.","W 1150 r."], a:2},
+
+{q:"Jaki był skutek testamentu Bolesława Krzywoustego pomimo jego zamiarów?",
+ o:["Polska stała się potęgą europejską","Synowie zachowali pokój przez 100 lat","Synowie wkrótce po śmierci ojca rozpoczęli bratobójcze walki","Polska połączyła się z Czechami"], a:2},
+
+{q:"Jak nazywa się epoka w historii Polski, która nastąpiła po śmierci Bolesława Krzywoustego?",
+ o:["Złoty wiek Piastów","Epoka zjednoczenia","Rozbicie dzielnicowe","Czas wielkich królów"], a:2},
+
+/* ── POLSKA NAD BAŁTYKIEM ── */
+{q:"Co było jednym z najważniejszych osiągnięć Bolesława Krzywoustego dla Polski?",
+ o:["Koronacja na króla","Odzyskanie Pomorza Gdańskiego i Zachodniego","Podbój Czech","Zawarcie wiecznego pokoju z cesarstwem"], a:1},
+
+{q:"W których wiekach Polska nie miała dostępu do morza?",
+ o:["W X i XI w.","W XI i XII w.","W XIV i XV w.","W XVI i XVII w."], a:2},
+
+{q:"W którym roku odrodzona Polska uzyskała fragment wybrzeża?",
+ o:["W 1900 r.","W 1918 r.","W 1939 r.","W 1945 r."], a:1},
+
+{q:"Jaki problem miała odrodzona Polska w 1918 roku pomimo uzyskania dostępu do morza?",
+ o:["Wybrzeże było zbyt krótkie","Nie miała żadnego dużego portu","Nie miała floty","Granica morska nie była uznana przez inne kraje"], a:1},
+
+{q:"Ile kilometrów wynosi długość polskiego wybrzeża?",
+ o:["Ponad 200 km","Ponad 300 km","Ponad 400 km","Ponad 600 km"], a:2},
+
+{q:"Które z poniższych miast NIE jest największym polskim portem wymienionym w podręczniku?",
+ o:["Gdańsk","Gdynia","Warszawa","Szczecin"], a:2},
+
+{q:"Które porty wymienia podręcznik jako największe polskie porty?",
+ o:["Gdańsk, Gdynia, Szczecin, Świnoujście i Kołobrzeg","Gdańsk, Wrocław, Poznań i Kraków","Szczecin, Wrocław, Gdańsk i Słupsk","Kołobrzeg, Darłowo, Ustka i Łeba"], a:0},
+
+{q:"Co umożliwia Polsce szeroki dostęp do morza?",
+ o:["Wydobycie ropy naftowej","Rozwój handlu, transportu i turystyki","Połowy ryb tylko dla lokalnych rybaków","Budowę baz wojskowych"], a:1},
+
+{q:"Jak w podręczniku opisano Zamek Książąt Pomorskich w Szczecinie?",
+ o:["Zamek z XVI wieku, siedziba królewska","Zamek dominujący nad centrum Szczecina, którego początki sięgają średniowiecza","Zamek zbudowany przez Krzyżaków","Zamek będący siedzibą arcybiskupów"], a:1},
+
+{q:"Stolicą jakiego województwa jest Szczecin?",
+ o:["Województwa pomorskiego","Województwa zachodniopomorskiego","Województwa kujawsko-pomorskiego","Województwa warmińsko-mazurskiego"], a:1},
+
+/* ── PODSUMOWANIE – SPRAWDŹ SIĘ ── */
+{q:"Kim był Sieciech i jaką rolę odgrywał w państwie Władysława Hermana?",
+ o:["Był biskupem i doradcą duchowym","Był palatynem, który przejął faktyczną rolę władcy","Był bratem Hermana i rządził Mazowszem","Był wodzem wojsk walczących z Niemcami"], a:1},
+
+{q:"Jak zakończył się spór między Zbigniewem a Bolesławem Krzywoustym?",
+ o:["Zbigniew rządził Wielkopolską do śmierci","Bolesław Krzywousty zmusił Zbigniewa do odejścia, a potem kazał go oślepić, zostając jedynym władcą","Zawarto trwały pokój i bracia rządzili osobno","Zbigniew uciekł do Czech i tam panował"], a:1},
+
+{q:"Jakie były skutki wypraw zbrojnych Bolesława Krzywoustego na Pomorze?",
+ o:["Polska utraciła Śląsk","Odzyskano Pomorze Gdańskie i Zachodnie, które oderwały się od Polski wcześniej, i szerzono tam chrześcijaństwo","Polska podbiła całe Prusy","Polska zawarła sojusz z Niemcami"], a:1},
+
+{q:"W jakim celu Bolesław Krzywousty podzielił Polskę między swoich synów?",
+ o:["Chciał osłabić Polskę","Chciał nagrodzić synów za pomoc w wojnie","Chciał zapobiec bratobójczej wojnie domowej po swojej śmierci","Zmusił go do tego cesarz"], a:2},
+
+{q:"Z jakim legendarnym wydarzeniem związana jest nazwa dzielnicy Wrocławia – Psie Pole?",
+ o:["Bitwą Kazimierza Odnowiciela z Czechami","Bitwą stoczoną przez Bolesława Krzywoustego z Niemcami w 1109 roku, po której psy miały wyjadać ciała poległych wrogów","Miejscem śmierci biskupa Stanisława","Miejscem koronacji Bolesława Śmiałego"], a:1},
+
+/* ── PYTANIA PRZEKROJOWE / CHRONOLOGICZNE ── */
+{q:"Uszereguj władców chronologicznie (od najwcześniejszego): Bolesław Krzywousty, Mieszko II, Kazimierz Odnowiciel, Bolesław Śmiały.",
+ o:["Krzywousty → Mieszko II → Kazimierz → Śmiały","Mieszko II → Kazimierz Odnowiciel → Bolesław Śmiały → Krzywousty","Kazimierz → Mieszko II → Śmiały → Krzywousty","Mieszko II → Śmiały → Kazimierz → Krzywousty"], a:1},
+
+{q:"Który władca zginął (lub uciekł) w wyniku buntu związanego z biskupem krakowskim?",
+ o:["Mieszko II","Kazimierz Odnowiciel","Bolesław Śmiały","Władysław Herman"], a:2},
+
+{q:"Który władca jako pierwszy podzielił kraj między synów, ustanawiając zasadę senioratu?",
+ o:["Mieszko II","Kazimierz Odnowiciel","Bolesław Śmiały","Bolesław Krzywousty"], a:3},
+
+{q:"W którym roku ogłoszono testament Bolesława Krzywoustego?",
+ o:["W 1109 r.","W 1122 r.","W 1131 r.","W 1138 r."], a:3},
+
+{q:"Które zdarzenie nastąpiło najwcześniej?",
+ o:["Koronacja Bolesława Śmiałego","Spustoszenie Wielkopolski przez Czechów","Odzyskanie Pomorza Gdańskiego","Najazd Henryka V na Polskę"], a:1},
+
+{q:"Które zdarzenie nastąpiło najpóźniej?",
+ o:["Śmierć Mieszka II","Kanonizacja (ogłoszenie świętym) biskupa Stanisława","Koronacja Bolesława Śmiałego","Śmierć Kazimierza Odnowiciela"], a:1},
+
+{q:"Która z podanych dat odpowiada koronacji Bolesława Śmiałego?",
+ o:["1025 r.","1058 r.","1076 r.","1102 r."], a:2},
+
+{q:"Która z podanych dat odpowiada śmierci Bolesława Krzywoustego i ogłoszeniu jego testamentu?",
+ o:["1109 r.","1122 r.","1138 r.","1150 r."], a:2},
+
+{q:"Który najazd na Polskę miał miejsce w 1109 roku?",
+ o:["Najazd czeski","Najazd pruski","Najazd Henryka V (Niemcy i Czesi)","Najazd ruski"], a:2},
+
+{q:"Który z poniższych władców NIE był królem, lecz rządził jedynie z tytułem księcia?",
+ o:["Mieszko II","Bolesław Śmiały","Władysław Herman","Bolesław Krzywousty"], a:2},
+
+/* ── POJĘCIA I DEFINICJE ── */
+{q:"Czym różni się senior od juniora w myśl testamentu Krzywoustego?",
+ o:["Senior jest starszy wiekiem i posiada władzę zwierzchnią; junior jest młodszy i jej podlega","Senior jest bogatszy; junior biedniejszy","Senior rządzi na wschodzie, junior na zachodzie","Nie ma między nimi różnicy"], a:0},
+
+{q:"Co oznacza słowo seniorat w kontekście średniowiecznej Polski?",
+ o:["Zasada, że władzą dziedziczą córki","Zasada, że najstarszy z rodu sprawuje władzę zwierzchnią","Zasada równego podziału terytorium","Rada starszych doradzająca władcy"], a:1},
+
+{q:"Co to są „bracia przyrodnie ?",
+ o:["Bracia mający wspólną matkę, lecz różnych ojców","Bracia mający wspólnego ojca, lecz różne matki","Bracia bliźniacy","Przybrani bracia adoptowani przez władcę"], a:1},
+
+{q:"Czym różnił się palatyn od biskupa w średniowiecznej Polsce?",
+ o:["Palatyn był urzędnikiem państwowym (zastępcą władcy), a biskup – duchownym zarządzającym diecezją","Palatyn sprawował władzę kościelną, a biskup – świecką","Nie było żadnej różnicy","Palatyn rządził całym państwem, a biskup tylko Małopolską"], a:0},
+
+{q:"Co oznaczało pojęcie inwestytura będące przyczyną konfliktu Bolesława Śmiałego z cesarzem?",
+ o:["Podział ziem między biskupów","Prawo mianowania biskupów i opatów – spór o to, czy należy ono do papieża czy cesarza","Nakładanie podatków przez Kościół","Uznanie papieża za głowę cesarstwa"], a:1},
+
+/* ── PYTANIA SZCZEGÓŁOWE ── */
+{q:"Który kronikarz opisał walki o Głogów i jak nazywa się jego dzieło?",
+ o:["Wincenty Kadłubek – Kronika polska","Gall Anonim – Kronika polska","Jan Długosz – Roczniki","Bolesław Krzywousty – Testament"], a:1},
+
+{q:"Jakie były losy Zbigniewa po jego powrocie do Polski w 1111 roku?",
+ o:["Rządził spokojnie Wielkopolską","Uciekł do Czech","Krzywousty kazał go pojmać i oślepić","Zbigniew zmarł z choroby"], a:2},
+
+{q:"Dlaczego Bolesław Krzywousty nie mógł uzyskać korony królewskiej?",
+ o:["Nie miał wystarczająco dużo pieniędzy","Podręcznik mówi, że mu się to nie udało (nie wyjaśniając w pełni przyczyn)","Papież mu odmówił ze względu na oślepienie Zbigniewa","Niemcy zablokowali koronację"], a:1},
+
+{q:"Co było skutkiem misji chrystianizacyjnych na Pomorzu organizowanych przez Krzywoustego?",
+ o:["Budowa zamków obronnych","Wielu możnowładców i mieszkańców Pomorza przyjęło chrzest","Krzywousty otrzymał tytuł królewski od papieża","Handel z Niemcami został wstrzymany"], a:1},
+
+{q:"Które województwo ma Szczecin jako swoją stolicę i jest związane z historycznym Pomorzem Zachodnim?",
+ o:["Województwo Lubuskie","Województwo Wielkopolskie","Województwo Zachodniopomorskie","Województwo Kujawsko-Pomorskie"], a:2},
+
+{q:"Które z poniższych stwierdzeń o Bolesławie Krzywoustym jest FAŁSZYWE?",
+ o:["Odparł najazd Henryka V w 1109 r.","Zdobył Pomorze Gdańskie i Zachodnie","Uzyskał koronę królewską","Podzielił Polskę testamentem w 1138 r."], a:2},
+
+{q:"Które z poniższych stwierdzeń o Kazimierzu Odnowiicielu jest PRAWDZIWE?",
+ o:["Przywrócił insygnia królewskie","Odbudował państwo i przywrócił chrześcijaństwo, choć nie odzyskał korony królewskiej","Zdobył Grody Czerwieńskie od Niemców","Rządził jednocześnie z Bolesławem Śmiałym"], a:1},
+
+{q:"Co stało się z Mazowszem i Pomorzem Gdańskim w czasie kryzysu po śmierci Mieszka II?",
+ o:["Zostały podbite przez Niemców","Oderwały się od Polski i stały się niezależnymi krainami","Trafiły pod władzę Czech","Zachowały wierność Polsce"], a:1},
+
+{q:"Który władca jako pierwszy sprawił, że Kraków stał się główną siedzibą władców Polski?",
+ o:["Bolesław Chrobry","Mieszko II","Kazimierz Odnowiciel","Bolesław Śmiały"], a:2},
+
+{q:"Jaką rolę w szerszym kontekście europejskim odegrało wsparcie Bolesława Śmiałego dla papieża Grzegorza VII?",
+ o:["Pozwoliło mu zdobyć nowe terytoria na zachodzie","Spowodowało powrót arcybiskupstwa do Gniezna i umożliwiło koronację królewską w 1076 r.","Zapewniło pokój z cesarstwem na 50 lat","Pozwoliło odbyć krucjatę do Ziemi Świętej"], a:1}
+
 ];
 
-/* Upewnij się, że mamy dokładnie 60 pytań; jeśli mniej, powielamy niektóre z lekką modyfikacją (dla kompletności testu) */
-(function ensureSixty(){
-  const base = questions.slice();
-  let i = 0;
-  while(questions.length < 60){
-    const src = base[i % base.length];
-    // sklonuj i ewentualnie drobnie zmodyfikuj tekst (np. dodać " (powt.)")
-    const clone = JSON.parse(JSON.stringify(src));
-    clone.q = clone.q + (questions.length < base.length ? "" : " (powtórzenie)");
-    questions.push(clone);
-    i++;
-  }
-})();
+/* ── STATE ── */
+let cC=0, cW=0, cA=0;
+const TOTAL=questions.length;
+const firstAnswers=new Array(TOTAL).fill(null); // null = unanswered
 
-/* Logika quizu */
-let idx = 0;
-const total = questions.length;
-const qcountEl = document.getElementById('qcount');
-const questionEl = document.getElementById('question');
-const optionsEl = document.getElementById('options');
-const feedbackArea = document.getElementById('feedbackArea');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const progressBar = document.getElementById('progressBar');
-
-const state = {
-  answers: Array(total).fill(null) // null / {choice: index, correct: bool}
-};
-
-function render(){
-  const item = questions[idx];
-  qcountEl.textContent = `Pytanie ${idx+1} z ${total}`;
-  questionEl.textContent = item.q;
-  optionsEl.innerHTML = '';
-  feedbackArea.innerHTML = '';
-
-  item.opts.forEach((optText, iOpt) => {
-    const btn = document.createElement('div');
-    btn.className = 'opt';
-    btn.tabIndex = 0;
-    btn.innerHTML = `<strong>${String.fromCharCode(65+iOpt)}.</strong>&nbsp;<span>${optText}</span>`;
-    btn.onclick = () => selectOption(iOpt);
-    btn.onkeypress = (e) => { if(e.key === 'Enter' || e.key === ' ') selectOption(iOpt); };
-    optionsEl.appendChild(btn);
+/* ── BUILD ── */
+function buildQuiz(){
+  const container=document.getElementById('quizContainer');
+  container.innerHTML='';
+  questions.forEach((q,i)=>{
+    const card=document.createElement('div');
+    card.className='qcard';
+    card.id='card'+i;
+    const letters=['A','B','C','D'];
+    const optsHtml=q.o.map((opt,oi)=>
+      `<button class="obtn" onclick="answer(${i},${oi})" id="ob${i}_${oi}">
+         <span class="oltr">${letters[oi]}.</span><span>${opt}</span>
+       </button>`
+    ).join('');
+    card.innerHTML=`
+      <div class="qhead">
+        <span class="qnum">${i+1}</span>
+        <span class="qtxt">${q.q}</span>
+      </div>
+      <div class="opts">${optsHtml}</div>
+      <div class="fb" id="fb${i}">
+        <span class="fi"></span><span class="ft"></span>
+      </div>`;
+    container.appendChild(card);
   });
-
-  // jeśli już odpowiedziano, pokaż wynik i zablokuj opcje
-  const prevAns = state.answers[idx];
-  if(prevAns){
-    markAnswered(prevAns.choice, prevAns.correct);
-    showExplanation(prevAns.correct, questions[idx].exp);
-  }
-
-  prevBtn.disabled = idx === 0;
-  nextBtn.textContent = idx === total-1 ? 'Zakończ' : 'Następne';
-  updateProgress();
+  updateUI();
 }
 
-function selectOption(choice){
-  // jeśli już odpowiedziano, ignoruj
-  if(state.answers[idx]) return;
-  const correctIndex = questions[idx].a;
-  const isCorrect = choice === correctIndex;
-  state.answers[idx] = {choice, correct: isCorrect};
-  markAnswered(choice, isCorrect);
-  showExplanation(isCorrect, questions[idx].exp);
-}
+/* ── ANSWER ── */
+function answer(qi,oi){
+  if(firstAnswers[qi]!==null) return; // already answered
+  firstAnswers[qi]=oi;
 
-function markAnswered(choice, isCorrect){
-  const optNodes = Array.from(optionsEl.children);
-  optNodes.forEach((node, i) => {
-    node.classList.add('disabled');
-    if(i === choice){
-      node.classList.add(isCorrect ? 'correct' : 'wrong');
-    }
-    if(i === questions[idx].a && i !== choice){
-      // pokaż poprawną odpowiedź, jeśli użytkownik wybrał źle
-      node.style.outline = '2px solid rgba(31,138,76,0.12)';
-    }
-  });
-}
+  const q=questions[qi];
+  const correct=q.a;
+  const btns=document.querySelectorAll(`[id^="ob${qi}_"]`);
+  btns.forEach(b=>b.disabled=true);
 
-function showExplanation(isCorrect, explanation){
-  const div = document.createElement('div');
-  div.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
-  div.textContent = isCorrect ? 'Dobra odpowiedź.' : 'Niestety, to niepoprawne.';
-  feedbackArea.appendChild(div);
+  const chosen=document.getElementById(`ob${qi}_${oi}`);
+  const fb=document.getElementById(`fb${qi}`);
 
-  const expl = document.createElement('div');
-  expl.className = 'explain';
-  expl.textContent = explanation || '';
-  feedbackArea.appendChild(expl);
-}
-
-function nextQ(){
-  if(idx < total - 1){
-    idx++;
-    render();
-    window.scrollTo({top:0,behavior:'smooth'});
+  if(oi===correct){
+    chosen.classList.add('correct');
+    fb.classList.add('show','cfb');
+    fb.querySelector('.fi').textContent='✅';
+    fb.querySelector('.ft').textContent='Świetnie! Dobra odpowiedź!';
+    cC++;
+    document.getElementById('cntC').textContent=cC;
   } else {
-    // zakończ test — pokaż podsumowanie
-    showSummary();
+    chosen.classList.add('wrong');
+    document.getElementById(`ob${qi}_${correct}`).classList.add('reveal');
+    fb.classList.add('show','wfb');
+    fb.querySelector('.fi').textContent='❌';
+    const letters=['A','B','C','D'];
+    fb.querySelector('.ft').textContent=
+      `Błąd! Poprawna odpowiedź: ${letters[correct]}. ${q.o[correct]}`;
+    cW++;
+    document.getElementById('cntW').textContent=cW;
+  }
+
+  cA++;
+  document.getElementById('cntA').textContent=cA;
+  document.getElementById('cntR').textContent=TOTAL-cA;
+  updateUI();
+
+  if(cA===TOTAL) setTimeout(showResult,600);
+  else {
+    // scroll to next unanswered
+    setTimeout(()=>{
+      for(let j=qi+1;j<TOTAL;j++){
+        if(firstAnswers[j]===null){
+          document.getElementById('card'+j)
+            .scrollIntoView({behavior:'smooth',block:'center'});
+          break;
+        }
+      }
+    },350);
   }
 }
 
-function prevQ(){
-  if(idx > 0){
-    idx--;
-    render();
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
+/* ── PROGRESS ── */
+function updateUI(){
+  const pct=(cA/TOTAL)*100;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progLbl').textContent=`${cA} / ${TOTAL} pytań`;
 }
 
-function updateProgress(){
-  const answered = state.answers.filter(Boolean).length;
-  const pct = Math.round((answered/total)*100);
-  progressBar.style.width = pct + '%';
+/* ── RESULT ── */
+let savedTxtContent = '';
+
+function buildResultText(){
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const dateStr=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  const timeStr=`${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const pct=Math.round((cC/TOTAL)*100);
+  const grade=getGrade(pct);
+  const L='\r\n';
+  let t='';
+  t+='============================================================'+L;
+  t+='  QUIZ HISTORYCZNY - POLSKA PIERWSZYCH PIASTOW'+L;
+  t+='  Rozdzial VI - Klasa 6'+L;
+  t+='============================================================'+L;
+  t+=`Data i godzina:   ${dateStr}  ${timeStr}`+L;
+  t+=`Wynik koncowy:    ${cC} / ${TOTAL} (${pct}%)`+L;
+  t+=`Ocena:            ${grade}`+L;
+  t+=`Poprawne:         ${cC}`+L;
+  t+=`Bledne:           ${cW}`+L;
+  t+=L;
+  t+='UWAGA: Liczy sie tylko PIERWSZA udzielona odpowiedz.'+L;
+  t+=L;
+  t+='------------------------------------------------------------'+L;
+  t+='SZCZEGOLOWE WYNIKI (pytanie po pytaniu):'+L;
+  t+='------------------------------------------------------------'+L;
+  const letters=['A','B','C','D'];
+  questions.forEach((q,i)=>{
+    const given=firstAnswers[i];
+    const isOk=(given===q.a);
+    t+=L;
+    t+=`Pyt. ${String(i+1).padStart(3,'0')}  [${isOk?'POPRAWNA':'BLEDNA  '}]`+L;
+    t+=`  Pytanie:          ${q.q}`+L;
+    t+=`  Twoja odpowiedz:  ${given!==null ? letters[given]+'. '+q.o[given] : '(brak)'}`+L;
+    if(!isOk) t+=`  Poprawna odp.:    ${letters[q.a]}. ${q.o[q.a]}`+L;
+  });
+  t+=L;
+  t+='============================================================'+L;
+  t+='Koniec raportu.'+L;
+  t+='============================================================'+L;
+  return { text: t, dateStr };
 }
 
-function showSummary(){
-  const answered = state.answers.filter(Boolean).length;
-  const correct = state.answers.filter(a => a && a.correct).length;
-  const card = document.getElementById('quizCard');
-  card.innerHTML = `
-    <div class="qcount">Wynik testu</div>
-    <div style="font-size:20px;font-weight:700;margin-top:8px">${correct} / ${total} poprawnych odpowiedzi</div>
-    <p style="color:var(--muted);margin-top:8px">Odpowiedziałeś na ${answered} pytań. Możesz przejrzeć pytania ponownie, klikając poniżej.</p>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button id="reviewBtn">Przejrzyj pytania</button>
-      <button class="secondary" id="restartBtn">Rozpocznij ponownie</button>
-    </div>
-    <div style="margin-top:12px;color:var(--muted);font-size:13px">Po zakończeniu możesz wrócić do dowolnego pytania, korzystając z przycisku "Przejrzyj pytania".</div>
-  `;
-  document.getElementById('reviewBtn').onclick = () => { idx = 0; rebuildCard(); render(); };
-  document.getElementById('restartBtn').onclick = () => { resetQuiz(); };
+function showResult(){
+  const rs=document.getElementById('resultSection');
+  rs.style.display='block';
+    downloadTxt;
+  const pct=Math.round((cC/TOTAL)*100);
+  document.getElementById('finalScore').textContent=`${cC} / ${TOTAL}  (${pct}%)`;
+  let msg='';
+  if(pct>=95) msg='🏆 Doskonale! Jesteś mistrzem historii Pierwszych Piastów!';
+  else if(pct>=85) msg='🌟 Bardzo dobrze! Znasz ten materiał świetnie!';
+  else if(pct>=70) msg='👍 Dobrze! Warto jednak powtórzyć kilka zagadnień.';
+  else if(pct>=50) msg='📖 Połowa materiału opanowana. Wróć do podręcznika i powtórz.';
+  else msg='📚 Koniecznie jeszcze raz przejrzyj materiał i spróbuj ponownie!';
+  document.getElementById('finalMsg').textContent=msg;
+
+  const bd=document.getElementById('breakdown');
+  bd.innerHTML=`
+    <div class="breakdown">
+      <h3>📊 Podsumowanie szczegółowe</h3>
+      <div class="bd-row"><span class="bd-dot bd-correct"></span>Poprawnych odpowiedzi: <strong>${cC}</strong></div>
+      <div class="bd-row"><span class="bd-dot bd-wrong"></span>Błędnych odpowiedzi: <strong>${cW}</strong></div>
+      <div class="bd-row">Procent poprawnych: <strong>${pct}%</strong></div>
+      <div class="bd-row">Ocena: <strong>${getGrade(pct)}</strong></div>
+    </div>`;
+
+  // Build and show text in textarea
+  const {text, dateStr} = buildResultText();
+  savedTxtContent = text;
+  document.getElementById('resultTxt').value = text;
+  document.getElementById('dlBtn').dataset.date = dateStr;
+
+  rs.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function downloadTxt(){
+  if(!savedTxtContent) return;
+  const dateStr = document.getElementById('dlBtn').dataset.date || 'wynik';
+  const blob = new Blob(['\uFEFF'+savedTxtContent], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `quiz_wynik_${dateStr}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function getGrade(pct){
+  if(pct>=95) return '6 (celujacy)';
+  if(pct>=85) return '5 (bardzo dobry)';
+  if(pct>=70) return '4 (dobry)';
+  if(pct>=55) return '3 (dostateczny)';
+  if(pct>=40) return '2 (dopuszczajacy)';
+  return '1 (niedostateczny)';
+}
+
+/* ── RESTART ── */
+function restartQuiz(){
+  cC=0; cW=0; cA=0;
+  firstAnswers.fill(null);
+  document.getElementById('cntC').textContent=0;
+  document.getElementById('cntW').textContent=0;
+  document.getElementById('cntA').textContent=0;
+  document.getElementById('cntR').textContent=TOTAL;
+  document.getElementById('resultSection').style.display='none';
+  buildQuiz();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function rebuildCard(){
-  // przywróć oryginalny HTML struktury quizu
-  const card = document.getElementById('quizCard');
-  card.innerHTML = `
-    <div class="qcount" id="qcount">Pytanie 1 z ${total}</div>
-    <div class="question" id="question"></div>
-    <div class="options" id="options"></div>
-    <div id="feedbackArea"></div>
-    <div class="controls">
-      <div style="flex:1">
-        <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="secondary" id="prevBtn" onclick="prevQ()" disabled>Poprzednie</button>
-        <button id="nextBtn" onclick="nextQ()">Następne</button>
-      </div>
-    </div>
-  `;
-  // rebind elements
-  qcountEl = document.getElementById('qcount');
-  questionEl = document.getElementById('question');
-  optionsEl = document.getElementById('options');
-  feedbackArea = document.getElementById('feedbackArea');
-  prevBtn = document.getElementById('prevBtn');
-  nextBtn = document.getElementById('nextBtn');
-  progressBar = document.getElementById('progressBar');
-}
-
-function resetQuiz(){
-  for(let i=0;i<state.answers.length;i++) state.answers[i]=null;
-  idx = 0;
-  // odtwórz oryginalny układ (proste rozwiązanie: przeładowanie strony)
-  location.reload();
-}
-
-/* Inicjalizacja */
-render();
-
-/* Ułatwienia klawiaturowe: strzałki do nawigacji */
-document.addEventListener('keydown', (e) => {
-  if(e.key === 'ArrowRight') nextQ();
-  if(e.key === 'ArrowLeft') prevQ();
-});
+/* ── INIT ── */
+buildQuiz();
 </script>
 </body>
 </html>
